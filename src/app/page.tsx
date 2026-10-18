@@ -531,6 +531,9 @@ export default function HomePage() {
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-theme-muted pt-4 border-t border-theme-subtle">
           <p>© 2026 AyahFlow Pro. All rights reserved.</p>
+          <p className="tracking-wide text-theme-secondary">
+            Crafted with care by <span className="text-theme-primary font-medium">Ashar Ashraf</span>
+          </p>
           <p>Audio powered by MP3Quran & AlQuran Cloud open datasets.</p>
         </div>
       </footer>
