@@ -26,6 +26,7 @@
 *.jks
 *.keystore
 *.apk
+!/apk/*.apk
 *.aab
 /android/key.properties
 /android/app/build/
