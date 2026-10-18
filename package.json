@@ -1,17 +1,33 @@
 {
   "name": "quranify",
+  "description": "AyahFlow Pro — Listen. Reflect. Find Peace.",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
-    "lint": "eslint"
+    "start": "npx serve out -l 3000",
+    "lint": "eslint",
+    "mobile:build": "next build && npx cap sync",
+    "mobile:sync": "npx cap sync",
+    "mobile:android": "npx cap open android",
+    "mobile:ios": "npx cap open ios"
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.3",
+    "@capacitor/app": "^8.1.2",
+    "@capacitor/cli": "^8.5.3",
+    "@capacitor/core": "^8.5.3",
+    "@capacitor/ios": "^8.5.3",
+    "@capacitor/splash-screen": "^8.0.2",
+    "@capacitor/status-bar": "^8.0.4",
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.59.0",
     "next": "16.4.2",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "tailwind-merge": "^3.7.0",
+    "zustand": "^5.0.15"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "^4",

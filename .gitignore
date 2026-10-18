@@ -23,6 +23,15 @@
 # misc
 .DS_Store
 *.pem
+*.jks
+*.keystore
+*.apk
+*.aab
+/android/key.properties
+/android/app/build/
+/android/.gradle/
+/android/build/
+/release-config-backups/
 
 # debug
 npm-debug.log*
