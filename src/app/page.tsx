@@ -130,7 +130,7 @@ export default function HomePage() {
                 className="px-5 py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs md:text-sm hover:scale-105 active:scale-95 transition-all shadow-lg shadow-emerald-600/25 flex items-center gap-2"
               >
                 <Play className="w-3.5 h-3.5 fill-current" />
-                <span>Explore 200+ Reciters</span>
+                <span>Explore 10+ Reciters</span>
               </Link>
 
               <a
