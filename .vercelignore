@@ -7,4 +7,5 @@ android
 ios
 release-config-backups
 *.aab
-apk
+/apk
+!src/components/apk
