@@ -74,19 +74,24 @@ export default function DownloadsPage() {
           </p>
 
           <div className="flex flex-wrap items-center gap-3 pt-2">
-            <a
-              href={process.env.NEXT_PUBLIC_ANDROID_APK_URL || '/ayahflow-pro.apk'}
-              download="ayahflow-pro.apk"
-              onClick={() => trackApkDownloadClick('downloads_page')}
-              className="px-6 py-3 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs md:text-sm hover:scale-105 active:scale-95 transition-all shadow-lg shadow-emerald-600/25 flex items-center gap-2"
-            >
-              <Download className="w-4 h-4" />
-              <span>Download APK for Android</span>
-            </a>
+            <div className="flex flex-col gap-1.5">
+              <a
+                href={process.env.NEXT_PUBLIC_ANDROID_APK_URL || '/ayahflow-pro.apk'}
+                download="ayahflow-pro.apk"
+                onClick={() => trackApkDownloadClick('downloads_page')}
+                className="px-6 py-3 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs md:text-sm hover:scale-105 active:scale-95 transition-all shadow-lg shadow-emerald-600/25 flex items-center gap-2"
+              >
+                <Download className="w-4 h-4" />
+                <span>Download APK for Android</span>
+              </a>
+              <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 pl-2">
+                Free • No ads • No tracking
+              </span>
+            </div>
 
-            <span className="text-xs text-theme-muted flex items-center gap-1">
+            <span className="text-xs text-theme-muted flex items-center gap-1 self-start sm:self-center mt-1 sm:mt-0">
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-              <span>Direct Install • Clean & Ad-Free</span>
+              <span>Direct Install • Clean & Safe</span>
             </span>
           </div>
 

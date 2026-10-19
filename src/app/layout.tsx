@@ -16,18 +16,16 @@ export const viewport = {
   viewportFit: "cover",
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
 };
 
-const SITE_URL = "https://ayahflow-quranify.vercel.app";
-const OG_IMAGE_URL = `${SITE_URL}/og-image.png`;
+const SITE_URL = "https://ayahflow-quranify.vercel.app/";
+const OG_BANNER_URL = `${SITE_URL}og-banner.png`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: "AyahFlow Pro — Quran Audio & Ambient Soundspace",
   description:
-    "Immerse in crystal-clear Holy Quran recitations layered with serene ambient soundscapes and live synchronized Tafsir. Listen. Reflect. Find Peace.",
+    "Quran recitation with your own ambient soundscape — calming rain, ocean waves, and synchronized Live Tafsir. Listen. Reflect. Find Peace.",
   keywords: [
     "AyahFlow",
     "AyahFlow Pro",
@@ -49,18 +47,18 @@ export const metadata: Metadata = {
   openGraph: {
     title: "AyahFlow Pro — Quran Audio & Ambient Soundspace",
     description:
-      "Immerse in crystal-clear Holy Quran recitations layered with serene ambient soundscapes and live synchronized Tafsir. Listen. Reflect. Find Peace.",
+      "Quran recitation with your own ambient soundscape — calming rain, ocean waves, and synchronized Live Tafsir. Listen. Reflect. Find Peace.",
     url: SITE_URL,
     siteName: "AyahFlow Pro",
     locale: "en_US",
     type: "website",
     images: [
       {
-        url: OG_IMAGE_URL,
-        secureUrl: OG_IMAGE_URL,
+        url: OG_BANNER_URL,
+        secureUrl: OG_BANNER_URL,
         width: 1200,
         height: 630,
-        alt: "AyahFlow Pro — Quran Audio with Ambient Soundspace",
+        alt: "AyahFlow Pro — Quran Recitation with Ambient Soundspace",
         type: "image/png",
       },
     ],
@@ -69,8 +67,8 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "AyahFlow Pro — Quran Audio & Ambient Soundspace",
     description:
-      "Immerse in crystal-clear Holy Quran recitations layered with serene ambient soundscapes and live synchronized Tafsir.",
-    images: [OG_IMAGE_URL],
+      "Quran recitation with your own ambient soundscape — calming rain, ocean waves, and synchronized Live Tafsir.",
+    images: [OG_BANNER_URL],
   },
 };
 
@@ -128,7 +126,7 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": "WebApplication",
               name: "AyahFlow Pro",
-              url: "https://ayahflow-quranify.vercel.app",
+              url: "https://ayahflow-quranify.vercel.app/",
               applicationCategory: "MultimediaApplication",
               operatingSystem: "All",
               featureList: [

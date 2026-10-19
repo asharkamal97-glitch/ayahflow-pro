@@ -25,28 +25,23 @@ export default function ApkInstallGuide({
   const steps = [
     {
       num: 1,
-      title: 'Download the official AyahFlow APK',
-      desc: 'Tap the Download button to save the official package directly to your device.',
+      title: 'Download the APK',
+      desc: 'Tap the Download button to save the official AyahFlow APK directly to your device.',
     },
     {
       num: 2,
-      title: 'Open the downloaded file',
-      desc: 'Locate the file in your notification drawer or your device\'s Downloads folder.',
+      title: 'Open APK & Allow Source',
+      desc: 'Open the downloaded file. If Android requests it, tap Settings and allow installation from this source.',
     },
     {
       num: 3,
-      title: 'Allow installation from this source if prompted',
-      desc: 'If Android prompts that installations from this source are restricted, tap Settings and toggle "Allow from this source".',
+      title: 'Tap Install',
+      desc: 'Return to the package installer and tap Install to complete installation.',
     },
     {
       num: 4,
-      title: 'Return to the installer and tap Install',
-      desc: 'Switch back to the installation prompt and tap Install to begin setup.',
-    },
-    {
-      num: 5,
-      title: 'Open AyahFlow when installation finishes',
-      desc: 'Once complete, tap Open to start your peaceful Quran audio and ambient listening journey.',
+      title: 'Review Play Protect Prompt',
+      desc: 'If Google Play Protect displays a warning, tap "More details" to review the package information and make an informed decision. Do not bypass protections blindly.',
     },
   ];
 
@@ -59,7 +54,7 @@ export default function ApkInstallGuide({
         <div className="flex flex-col gap-1">
           <div className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
             <Smartphone className="w-3.5 h-3.5" />
-            <span>Android Sideload Guide</span>
+            <span>Android Installation Guide</span>
           </div>
           <h3 className="text-xl md:text-2xl font-black tracking-tight text-theme-primary">
             How to install AyahFlow
@@ -78,8 +73,8 @@ export default function ApkInstallGuide({
         </a>
       </div>
 
-      {/* 5 Steps Grid / List */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+      {/* 4 Steps Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {steps.map((step) => (
           <div
             key={step.num}
@@ -93,7 +88,7 @@ export default function ApkInstallGuide({
                 {step.title}
               </span>
             </div>
-            <p className="text-[11px] text-theme-secondary leading-relaxed pl-8 md:pl-0">
+            <p className="text-[11px] text-theme-secondary leading-relaxed pl-8 sm:pl-0">
               {step.desc}
             </p>
           </div>

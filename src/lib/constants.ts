@@ -334,17 +334,6 @@ export const COLLECTIONS: Collection[] = [
     category: "tajwid"
   },
   {
-    id: "focus-and-work",
-    slug: "focus-and-work",
-    title: "Focus & Work",
-    subtitle: "Calm, contemplative recitation to keep you focused and centered",
-    description: "Serene recitations that help you stay centered and peaceful during work or study.",
-    coverGradient: "from-teal-800 via-slate-900 to-black",
-    reciterId: "mishari-rashid-al-afasy-kw",
-    surahNumbers: [18, 36, 55, 67, 73, 93, 94],
-    category: "mood"
-  },
-  {
     id: "yasser-al-dosari-special",
     slug: "yasser-al-dosari-special",
     title: "Yasser Al-Dosari Masterpieces",
