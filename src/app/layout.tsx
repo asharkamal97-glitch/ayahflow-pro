@@ -6,6 +6,7 @@ import MobileNav from "@/components/layout/MobileNav";
 import AudioPlayer from "@/components/player/AudioPlayer";
 import MobileAppBridge from "@/components/layout/MobileAppBridge";
 import ThemeManager from "@/components/theme/ThemeManager";
+import { Analytics } from "@vercel/analytics/react";
 
 export const viewport = {
   themeColor: [
@@ -19,37 +20,57 @@ export const viewport = {
   userScalable: false,
 };
 
+const SITE_URL = "https://ayahflow-quranify.vercel.app";
+const OG_IMAGE_URL = `${SITE_URL}/og-image.png`;
+
 export const metadata: Metadata = {
-  title: "AyahFlow Pro — Listen. Reflect. Find Peace.",
+  metadataBase: new URL(SITE_URL),
+  title: "AyahFlow Pro — Quran Audio & Ambient Soundspace",
   description:
-    "Listen to Holy Quran recitations and follow Arabic text and tafsir. AyahFlow Pro: Listen. Reflect. Find Peace.",
+    "Immerse in crystal-clear Holy Quran recitations layered with serene ambient soundscapes and live synchronized Tafsir. Listen. Reflect. Find Peace.",
   keywords: [
-    "Quran",
-    "AyahFlow Pro",
     "AyahFlow",
-    "Quran audio",
-    "Listen Quran online",
+    "AyahFlow Pro",
+    "Quran Audio",
+    "Ambient Soundspace",
+    "Quran with nature sounds",
+    "Quran recitation",
     "Yasser Al-Dosari",
     "Mishary Rashid Alafasy",
     "Abdul Basit",
-    "Quran streaming",
-    "Islamic audio"
+    "Atmospheric Quran audio",
+    "Tafsir synchronized",
+    "Islamic relaxation audio"
   ],
   authors: [{ name: "AyahFlow Pro" }],
+  alternates: {
+    canonical: SITE_URL,
+  },
   openGraph: {
-    title: "AyahFlow Pro — Listen. Reflect. Find Peace.",
+    title: "AyahFlow Pro — Quran Audio & Ambient Soundspace",
     description:
-      "Listen to Quran recitations, follow Arabic text and tafsir, and find a peaceful rhythm for reflection with AyahFlow Pro.",
-    url: "https://quranify.pro/en",
+      "Immerse in crystal-clear Holy Quran recitations layered with serene ambient soundscapes and live synchronized Tafsir. Listen. Reflect. Find Peace.",
+    url: SITE_URL,
     siteName: "AyahFlow Pro",
     locale: "en_US",
     type: "website",
+    images: [
+      {
+        url: OG_IMAGE_URL,
+        secureUrl: OG_IMAGE_URL,
+        width: 1200,
+        height: 630,
+        alt: "AyahFlow Pro — Quran Audio with Ambient Soundspace",
+        type: "image/png",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "AyahFlow Pro — Listen. Reflect. Find Peace.",
+    title: "AyahFlow Pro — Quran Audio & Ambient Soundspace",
     description:
-      "Listen to Quran recitations, follow Arabic text and tafsir, and find a peaceful rhythm for reflection with AyahFlow Pro.",
+      "Immerse in crystal-clear Holy Quran recitations layered with serene ambient soundscapes and live synchronized Tafsir.",
+    images: [OG_IMAGE_URL],
   },
 };
 
@@ -107,20 +128,23 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": "WebApplication",
               name: "AyahFlow Pro",
-              url: "https://quranify.pro",
+              url: "https://ayahflow-quranify.vercel.app",
               applicationCategory: "MultimediaApplication",
               operatingSystem: "All",
               featureList: [
-                "Quran recitations by renowned reciters",
-                "Real-time Arabic text and translation",
-                "Curated mood collections",
-                "Sleep timer and persistent player"
+                "Crystal-clear Quran audio recitations by renowned Qaris",
+                "Ambient Soundspace: customizable nature atmospheres beneath recitation",
+                "Live synchronized Tafsir reflections",
+                "Daily Quran habit streak and sleep timer"
               ]
             })
           }}
         />
       </head>
       <body className="min-h-full flex overflow-hidden font-sans bg-theme-app text-theme-primary">
+        {/* Vercel Web Analytics */}
+        <Analytics />
+
         {/* Theme Manager & Native System Sync */}
         <ThemeManager />
 

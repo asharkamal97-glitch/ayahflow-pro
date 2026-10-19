@@ -21,6 +21,7 @@
     "@capacitor/ios": "^8.5.3",
     "@capacitor/splash-screen": "^8.0.2",
     "@capacitor/status-bar": "^8.0.4",
+    "@vercel/analytics": "^2.0.1",
     "clsx": "^2.1.1",
     "lucide-react": "^1.59.0",
     "next": "16.4.2",

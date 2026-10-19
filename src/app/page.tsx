@@ -21,6 +21,10 @@ import {
   Smartphone,
   Compass
 } from 'lucide-react';
+import TrustStrip from '@/components/apk/TrustStrip';
+import ApkInstallGuide from '@/components/apk/ApkInstallGuide';
+import ScreenshotGallery from '@/components/gallery/ScreenshotGallery';
+import { trackApkDownloadClick } from '@/lib/analytics';
 
 export default function HomePage() {
   const {
@@ -136,6 +140,7 @@ export default function HomePage() {
               <a
                 href={apkUrl}
                 download="ayahflow-pro.apk"
+                onClick={() => trackApkDownloadClick('hero_cta')}
                 className="px-4 py-2.5 rounded-full bg-theme-surface hover:bg-theme-elevated text-theme-primary font-semibold text-xs md:text-sm border border-theme-subtle hover:border-emerald-500/40 transition-all flex items-center gap-2 shadow-sm"
                 title="Direct Android APK Download (29.2 MB)"
               >
@@ -151,6 +156,9 @@ export default function HomePage() {
                 <span>Mood Collections</span>
               </Link>
             </div>
+
+            {/* Compact Trust Strip */}
+            <TrustStrip variant="compact" className="w-full max-w-xl mt-1" />
           </div>
 
           {/* Spatial Preview Widget */}
@@ -508,7 +516,17 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* SECTION 4: Brand Mission & Footer Info */}
+      {/* SECTION 4: Real App Screenshots & Ambient Soundspace Gallery */}
+      <section className="flex flex-col gap-6 pt-4">
+        <ScreenshotGallery />
+      </section>
+
+      {/* SECTION 5: Android APK Installation Guide */}
+      <section className="flex flex-col gap-6 pt-2">
+        <ApkInstallGuide apkUrl={apkUrl} />
+      </section>
+
+      {/* SECTION 6: Brand Mission & Footer Info */}
       <footer className="pt-10 pb-6 border-t border-theme-subtle flex flex-col gap-8 text-xs text-theme-secondary">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="flex flex-col gap-1 max-w-md">

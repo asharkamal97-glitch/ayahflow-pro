@@ -13,6 +13,10 @@ import {
   AlertCircle,
   ArrowRight,
 } from 'lucide-react';
+import TrustStrip from '@/components/apk/TrustStrip';
+import ApkInstallGuide from '@/components/apk/ApkInstallGuide';
+import ScreenshotGallery from '@/components/gallery/ScreenshotGallery';
+import { trackApkDownloadClick } from '@/lib/analytics';
 
 export default function DownloadsPage() {
   const { downloadedSurahs, toggleDownloadedSurah, playSurah } = usePlayerStore();
@@ -52,61 +56,49 @@ export default function DownloadsPage() {
 
       {/* MOBILE ANDROID APP APK DOWNLOAD SECTION */}
       <div className="relative overflow-hidden rounded-3xl spatial-glass-card p-6 md:p-8 border border-theme-subtle shadow-xl">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="flex flex-col gap-2.5 max-w-xl">
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25">
-                Official Android APK
-              </span>
-              <span className="text-[11px] font-mono text-theme-muted">
-                v1.0.0 • 29.2 MB
-              </span>
-            </div>
-
-            <h2 className="text-xl md:text-2xl font-bold tracking-tight text-theme-primary">
-              AyahFlow Pro for Android
-            </h2>
-            <p className="text-xs md:text-sm text-theme-secondary leading-relaxed">
-              Experience flawless lock-screen audio playback, hardware media notification controls, background ambient atmosphere mixing, and instant offline access on your phone.
-            </p>
-
-            <div className="flex flex-wrap items-center gap-3 pt-2">
-              <a
-                href={process.env.NEXT_PUBLIC_ANDROID_APK_URL || '/ayahflow-pro.apk'}
-                download="ayahflow-pro.apk"
-                className="px-6 py-3 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs md:text-sm hover:scale-105 active:scale-95 transition-all shadow-lg shadow-emerald-600/25 flex items-center gap-2"
-              >
-                <Download className="w-4 h-4" />
-                <span>Download APK for Android</span>
-              </a>
-
-              <span className="text-xs text-theme-muted flex items-center gap-1">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-                <span>Direct Install • Clean & Ad-Free</span>
-              </span>
-            </div>
-          </div>
-
-          {/* Installation steps preview */}
-          <div className="rounded-2xl bg-theme-elevated/80 border border-theme-subtle p-4 flex flex-col gap-2.5 text-xs text-theme-secondary md:max-w-xs shrink-0">
-            <span className="font-bold text-theme-primary uppercase text-[10px] tracking-wider">
-              How to Install on Android:
+        <div className="flex flex-col gap-4 max-w-3xl">
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25">
+              Official Android APK
             </span>
-            <div className="flex items-start gap-2">
-              <span className="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold flex items-center justify-center text-[10px] shrink-0 mt-0.5">1</span>
-              <span>Tap <strong>Download APK</strong> to save the file.</span>
-            </div>
-            <div className="flex items-start gap-2">
-              <span className="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold flex items-center justify-center text-[10px] shrink-0 mt-0.5">2</span>
-              <span>Select <strong>Download anyway</strong> if your browser prompts.</span>
-            </div>
-            <div className="flex items-start gap-2">
-              <span className="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold flex items-center justify-center text-[10px] shrink-0 mt-0.5">3</span>
-              <span>Tap the completed download & enable &ldquo;Allow from this source&rdquo; if asked.</span>
-            </div>
+            <span className="text-[11px] font-mono text-theme-muted">
+              v1.0.0 • 29.2 MB
+            </span>
           </div>
+
+          <h2 className="text-xl md:text-3xl font-bold tracking-tight text-theme-primary">
+            AyahFlow Pro for Android
+          </h2>
+          <p className="text-xs md:text-sm text-theme-secondary leading-relaxed">
+            Experience flawless lock-screen audio playback, hardware media notification controls, background ambient atmosphere mixing, and instant offline access on your phone.
+          </p>
+
+          <div className="flex flex-wrap items-center gap-3 pt-2">
+            <a
+              href={process.env.NEXT_PUBLIC_ANDROID_APK_URL || '/ayahflow-pro.apk'}
+              download="ayahflow-pro.apk"
+              onClick={() => trackApkDownloadClick('downloads_page')}
+              className="px-6 py-3 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs md:text-sm hover:scale-105 active:scale-95 transition-all shadow-lg shadow-emerald-600/25 flex items-center gap-2"
+            >
+              <Download className="w-4 h-4" />
+              <span>Download APK for Android</span>
+            </a>
+
+            <span className="text-xs text-theme-muted flex items-center gap-1">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+              <span>Direct Install • Clean & Ad-Free</span>
+            </span>
+          </div>
+
+          <TrustStrip variant="compact" className="mt-2" />
         </div>
       </div>
+
+      {/* DETAILED APK INSTALLATION & TROUBLESHOOTING GUIDE */}
+      <ApkInstallGuide apkUrl={process.env.NEXT_PUBLIC_ANDROID_APK_URL || '/ayahflow-pro.apk'} />
+
+      {/* REAL APP SCREENSHOT GALLERY */}
+      <ScreenshotGallery />
 
       {/* Downloaded Surah List */}
       {downloadedList.length === 0 ? (
