@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
+import { Amiri, Inter } from "next/font/google";
 import "./globals.css";
 import Sidebar from "@/components/layout/Sidebar";
 import MobileNav from "@/components/layout/MobileNav";
@@ -7,6 +8,19 @@ import AudioPlayer from "@/components/player/AudioPlayer";
 import MobileAppBridge from "@/components/layout/MobileAppBridge";
 import ThemeManager from "@/components/theme/ThemeManager";
 import { Analytics } from "@vercel/analytics/react";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const amiri = Amiri({
+  subsets: ["arabic", "latin"],
+  weight: ["400", "700"],
+  variable: "--font-amiri",
+  display: "swap",
+});
 
 export const viewport: Viewport = {
   themeColor: [
@@ -78,7 +92,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning className="h-full bg-theme-app text-theme-primary">
+    <html lang="en" suppressHydrationWarning className={`h-full bg-theme-app text-theme-primary ${inter.variable} ${amiri.variable}`}>
       <head>
         {/* Anti-flicker theme hydration script */}
         <script
@@ -112,12 +126,6 @@ export default function RootLayout({
             `,
           }}
         />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600;700;800&display=swap"
-          rel="stylesheet"
-        />
         {/* Schema.org WebApplication structured data */}
         <script
           type="application/ld+json"
@@ -139,7 +147,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="min-h-full flex overflow-hidden font-sans bg-theme-app text-theme-primary">
+      <body className={`${inter.className} min-h-full flex overflow-hidden font-sans bg-theme-app text-theme-primary`}>
         {/* Vercel Web Analytics */}
         <Analytics />
 

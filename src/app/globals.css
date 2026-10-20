@@ -112,7 +112,7 @@
   body {
     background-color: var(--bg-app);
     color: var(--text-primary);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     overflow-x: hidden;
     user-select: none;
     -webkit-font-smoothing: antialiased;
@@ -258,7 +258,7 @@
 }
 
 .arabic-text {
-  font-family: "Amiri", "Scheherazade New", "Traditional Arabic", "Noto Naskh Arabic", Tahoma, sans-serif;
+  font-family: var(--font-amiri), "Amiri", "Scheherazade New", "Traditional Arabic", "Noto Naskh Arabic", Tahoma, sans-serif;
 }
 
 /* Stacking Context Hierarchy (Fixes modal overlay underneath FullScreenPlayer) */
