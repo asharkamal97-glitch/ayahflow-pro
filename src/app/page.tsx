@@ -306,7 +306,7 @@ export default function HomePage() {
                   <span>Download for Android (APK)</span>
                 </a>
                 <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 pl-2">
-                  Free • No ads • No tracking
+                  Free • No ads • Privacy-friendly analytics
                 </span>
               </div>
 

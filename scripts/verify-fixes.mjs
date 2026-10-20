@@ -25,7 +25,7 @@ console.log('user-scalable=no is absent:', !html.includes('user-scalable=no') &&
 
 console.log('\n--- CONTENT CHECKS ---');
 console.log('Hero Subtitle matches:', html.includes('Quran recitation with your own ambient soundscape — calming rain, ocean waves and more.'));
-console.log('Trust line "Free • No ads • No tracking":', html.includes('Free • No ads • No tracking'));
+console.log('Trust line "Free • No ads • Privacy-friendly analytics":', html.includes('Free • No ads • Privacy-friendly analytics'));
 console.log('Installation Guide present:', html.includes('Installation Guide'));
 console.log('Play Protect guidance present:', html.includes('Google Play Protect'));
 
