@@ -8,8 +8,8 @@ if (releaseKeyPropertiesFile.exists()) {
 def releaseSigningKeys = ['storeFile', 'storePassword', 'keyAlias', 'keyPassword']
 def hasAnyReleaseSigningValue = releaseSigningKeys.any { releaseKeyProperties.getProperty(it)?.trim() }
 def hasCompleteReleaseSigningConfig = releaseSigningKeys.every { releaseKeyProperties.getProperty(it)?.trim() }
-if (hasAnyReleaseSigningValue && !hasCompleteReleaseSigningConfig) {
-    throw new GradleException('android/key.properties must define all four release signing fields, or none.')
+if (releaseKeyPropertiesFile.exists() && !hasCompleteReleaseSigningConfig) {
+    throw new GradleException('android/key.properties must define all four release signing fields: storeFile, storePassword, keyAlias, keyPassword.')
 }
 
 android {
@@ -50,10 +50,13 @@ android {
 }
 
 tasks.configureEach { releaseTask ->
-    if (releaseTask.name in ['assembleRelease', 'bundleRelease']) {
+    if (releaseTask.name in ['assembleRelease', 'bundleRelease', 'packageRelease']) {
         releaseTask.doFirst {
+            if (!releaseKeyPropertiesFile.exists()) {
+                throw new GradleException('Release build failed: android/key.properties is missing. Configure android/key.properties locally with storeFile, storePassword, keyAlias, and keyPassword before building a release artifact.')
+            }
             if (!hasCompleteReleaseSigningConfig) {
-                throw new GradleException('Release signing is required. Configure android/key.properties locally before building a release artifact.')
+                throw new GradleException('Release build failed: android/key.properties must define all four release signing fields: storeFile, storePassword, keyAlias, and keyPassword.')
             }
         }
     }
