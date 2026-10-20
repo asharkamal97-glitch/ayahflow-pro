@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
 import "./globals.css";
 import Sidebar from "@/components/layout/Sidebar";
@@ -8,7 +8,7 @@ import MobileAppBridge from "@/components/layout/MobileAppBridge";
 import ThemeManager from "@/components/theme/ThemeManager";
 import { Analytics } from "@vercel/analytics/react";
 
-export const viewport = {
+export const viewport: Viewport = {
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#FBF9F5" },
     { media: "(prefers-color-scheme: dark)", color: "#121316" }
@@ -23,9 +23,9 @@ const OG_BANNER_URL = `${SITE_URL}og-banner.png`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: "AyahFlow Pro — Quran Audio & Ambient Soundspace",
+  title: "AyahFlow — Quran Recitation with Rain & Ocean Sounds",
   description:
-    "Quran recitation with your own ambient soundscape — calming rain, ocean waves, and synchronized Live Tafsir. Listen. Reflect. Find Peace.",
+    "Listen to Quran recitation with calming rain, ocean waves and ambient sounds. Create your own peaceful soundscape with AyahFlow. Free Android app.",
   keywords: [
     "AyahFlow",
     "AyahFlow Pro",
@@ -45,9 +45,9 @@ export const metadata: Metadata = {
     canonical: SITE_URL,
   },
   openGraph: {
-    title: "AyahFlow Pro — Quran Audio & Ambient Soundspace",
+    title: "AyahFlow — Quran Recitation + Ambient Sounds",
     description:
-      "Quran recitation with your own ambient soundscape — calming rain, ocean waves, and synchronized Live Tafsir. Listen. Reflect. Find Peace.",
+      "Find your peaceful soundscape with Quran recitation, calming rain, ocean waves and more.",
     url: SITE_URL,
     siteName: "AyahFlow Pro",
     locale: "en_US",
@@ -65,9 +65,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "AyahFlow Pro — Quran Audio & Ambient Soundspace",
+    title: "AyahFlow — Quran Recitation + Ambient Sounds",
     description:
-      "Quran recitation with your own ambient soundscape — calming rain, ocean waves, and synchronized Live Tafsir.",
+      "Listen to Quran recitation alongside calming rain, ocean waves and other ambient sounds.",
     images: [OG_BANNER_URL],
   },
 };
