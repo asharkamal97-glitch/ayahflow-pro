@@ -56,7 +56,7 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "AyahFlow Pro" }],
   alternates: {
-    canonical: SITE_URL,
+    canonical: './',
   },
   openGraph: {
     title: "AyahFlow — Quran Recitation + Ambient Sounds",

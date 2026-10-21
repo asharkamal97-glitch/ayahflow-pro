@@ -62,7 +62,7 @@ export default function HomePage() {
   };
 
   const tajwidReciters = RECITERS.filter((r) => r.tags?.includes('tajwid'));
-  const apkUrl = process.env.NEXT_PUBLIC_ANDROID_APK_URL || '/ayahflow-pro.apk';
+  const apkUrl = process.env.NEXT_PUBLIC_ANDROID_APK_URL || 'https://github.com/asharkamal97-glitch/ayahflow-pro/releases/download/v1.0.0/app-release.apk';
 
   return (
     <div className="flex flex-col gap-8 md:gap-10 px-4 md:px-10 py-6 md:py-8 max-w-7xl mx-auto w-full pb-32">
@@ -297,10 +297,10 @@ export default function HomePage() {
               <div className="flex flex-col gap-1">
                 <a
                   href={apkUrl}
-                  download="ayahflow-pro.apk"
+                  download="app-release.apk"
                   onClick={() => trackApkDownloadClick('hero_cta')}
                   className="px-5 py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs md:text-sm hover:scale-105 active:scale-95 transition-all shadow-lg shadow-emerald-600/25 flex items-center gap-2"
-                  title="Direct Android APK Download (29.2 MB)"
+                  title="Direct Android APK Download (57.8 MB)"
                 >
                   <Smartphone className="w-4 h-4" />
                   <span>Download for Android (APK)</span>

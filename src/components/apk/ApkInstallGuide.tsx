@@ -17,7 +17,7 @@ interface ApkInstallGuideProps {
 }
 
 export default function ApkInstallGuide({
-  apkUrl = '/ayahflow-pro.apk',
+  apkUrl = 'https://github.com/asharkamal97-glitch/ayahflow-pro/releases/download/v1.0.0/app-release.apk',
   className = '',
 }: ApkInstallGuideProps) {
   const [troubleshootOpen, setTroubleshootOpen] = useState(false);
@@ -64,12 +64,12 @@ export default function ApkInstallGuide({
         {/* Action Button inside Guide */}
         <a
           href={apkUrl}
-          download="ayahflow-pro.apk"
+          download="app-release.apk"
           onClick={() => trackApkDownloadClick('guide_button')}
           className="self-start sm:self-auto px-5 py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs md:text-sm hover:scale-105 active:scale-95 transition-all shadow-md shadow-emerald-600/20 flex items-center gap-2"
         >
           <Download className="w-4 h-4" />
-          <span>Download APK (29.2 MB)</span>
+          <span>Download APK (57.8 MB)</span>
         </a>
       </div>
 

@@ -62,7 +62,7 @@ export default function DownloadsPage() {
               Official Android APK
             </span>
             <span className="text-[11px] font-mono text-theme-muted">
-              v1.0.0 • 29.2 MB
+              v1.0.0 • 57.8 MB
             </span>
           </div>
 
@@ -76,8 +76,8 @@ export default function DownloadsPage() {
           <div className="flex flex-wrap items-center gap-3 pt-2">
             <div className="flex flex-col gap-1.5">
               <a
-                href={process.env.NEXT_PUBLIC_ANDROID_APK_URL || '/ayahflow-pro.apk'}
-                download="ayahflow-pro.apk"
+                href={process.env.NEXT_PUBLIC_ANDROID_APK_URL || 'https://github.com/asharkamal97-glitch/ayahflow-pro/releases/download/v1.0.0/app-release.apk'}
+                download="app-release.apk"
                 onClick={() => trackApkDownloadClick('downloads_page')}
                 className="px-6 py-3 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs md:text-sm hover:scale-105 active:scale-95 transition-all shadow-lg shadow-emerald-600/25 flex items-center gap-2"
               >
@@ -100,7 +100,7 @@ export default function DownloadsPage() {
       </div>
 
       {/* DETAILED APK INSTALLATION & TROUBLESHOOTING GUIDE */}
-      <ApkInstallGuide apkUrl={process.env.NEXT_PUBLIC_ANDROID_APK_URL || '/ayahflow-pro.apk'} />
+      <ApkInstallGuide apkUrl={process.env.NEXT_PUBLIC_ANDROID_APK_URL || 'https://github.com/asharkamal97-glitch/ayahflow-pro/releases/download/v1.0.0/app-release.apk'} />
 
       {/* REAL APP SCREENSHOT GALLERY */}
       <ScreenshotGallery />
