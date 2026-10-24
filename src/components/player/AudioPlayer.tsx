@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useRef, useEffect, useState, useSyncExternalStore } from 'react';
+import React, { useRef, useEffect, useState, useSyncExternalStore, useCallback } from 'react';
 import { usePlayerStore } from '@/store/usePlayerStore';
 import { PLAYBACK_SPEEDS, AMBIENT_SOUNDS } from '@/lib/constants';
-import { audioManager } from '@/lib/audioManager';
+import { audioManager, formatAudioTime, formatAudioDuration } from '@/lib/audioManager';
 import {
   Play,
   Pause,
@@ -77,35 +77,68 @@ export default function AudioPlayer() {
     setAmbientModalOpen,
     setLiveTafsirActive,
     setFullScreenPlayerOpen,
-    recordListeningTime
+    recordListeningTime,
+    handleTrackEnded,
+    handleAudioError
   } = usePlayerStore();
 
   // Resolve actual local audio url from AMBIENT_SOUNDS
   const currentAmbient = AMBIENT_SOUNDS.find((s) => s.id === selectedAmbientSound?.id);
   const ambientAudioUrl = currentAmbient ? currentAmbient.audioUrl : (selectedAmbientSound?.audioUrl || '');
 
-  // Register audio elements with centralized AudioManager
-  useEffect(() => {
-    audioManager.registerAudioElement(audioRef.current);
+  // Callback ref guarantees real DOM element is immediately registered with AudioManager
+  const handleAudioRef = useCallback((element: HTMLAudioElement | null) => {
+    audioRef.current = element;
+    if (element) {
+      audioManager.registerAudioElement(element);
+    }
   }, []);
 
+  // Subscribe to authoritative media events from AudioManager
   useEffect(() => {
-    audioManager.registerAmbientElement(ambientAudioRef.current);
-  }, []);
+    if (audioRef.current) {
+      audioManager.registerAudioElement(audioRef.current);
+    }
+
+    const unsubProgress = audioManager.onProgress((time, dur) => {
+      updateProgress(time, dur);
+    });
+
+    const unsubEnded = audioManager.onEnded(() => {
+      handleTrackEnded(currentTrack?.audioUrl);
+    });
+
+    const unsubError = audioManager.onError(() => {
+      handleAudioError(currentTrack?.audioUrl);
+    });
+
+    return () => {
+      unsubProgress();
+      unsubEnded();
+      unsubError();
+    };
+  }, [updateProgress, handleTrackEnded, handleAudioError, currentTrack?.audioUrl]);
 
   // Sync main recitation play/pause
   useEffect(() => {
     if (!audioRef.current || !currentTrack) return;
 
     if (isPlaying) {
-      audioRef.current.play().catch((err) => {
-        console.warn('Playback interrupted or prevented by browser:', err);
-        pause();
+      audioRef.current.playbackRate = playbackSpeed;
+      audioRef.current.play().catch((err: any) => {
+        if (err.name === 'AbortError') {
+          // Play request was interrupted by a new load or play call; normal during track transitions
+          return;
+        }
+        if (err.name === 'NotAllowedError') {
+          console.warn('Playback prevented by browser autoplay policy:', err);
+          pause();
+        }
       });
     } else {
       audioRef.current.pause();
     }
-  }, [isPlaying, currentTrack?.audioUrl, pause]);
+  }, [isPlaying, currentTrack?.audioUrl, playbackSpeed, pause]);
 
   // Sync recitation volume
   useEffect(() => {
@@ -122,16 +155,14 @@ export default function AudioPlayer() {
   // Sync secondary ambient audio element
   useEffect(() => {
     const ambientEl = ambientAudioRef.current;
-    if (!ambientEl) return;
+    if (!ambientEl) {
+      audioManager.registerAmbientElement(null);
+      return;
+    }
 
     ambientEl.volume = isMuted ? 0 : ambientVolume;
 
     if (ambientAudioUrl) {
-      if (!ambientEl.src.endsWith(ambientAudioUrl)) {
-        ambientEl.src = ambientAudioUrl;
-        ambientEl.load();
-      }
-
       const shouldPlay = isAmbientPlaying && (isPlaying || isAmbientModalOpen);
 
       if (shouldPlay) {
@@ -185,13 +216,6 @@ export default function AudioPlayer() {
 
   const isFav = favorites.includes(currentTrack.surah.number);
 
-  const formatTime = (seconds: number) => {
-    if (isNaN(seconds) || seconds <= 0) return '0:00';
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-  };
-
   const effectiveTime = isDragging ? dragTime : currentTime;
 
   const handlePointerDown = () => {
@@ -199,58 +223,75 @@ export default function AudioPlayer() {
     setDragTime(currentTime);
   };
 
-  const handleInput = (e: React.FormEvent<HTMLInputElement>) => {
-    const val = parseFloat(e.currentTarget.value);
-    setDragTime(val);
+  const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = parseFloat(e.target.value);
+    if (isDragging) {
+      setDragTime(isNaN(val) ? 0 : val);
+    } else {
+      seek(isNaN(val) ? 0 : val);
+    }
   };
 
-  const handleSeekCommit = (e: React.ChangeEvent<HTMLInputElement> | React.PointerEvent<HTMLInputElement> | React.TouchEvent<HTMLInputElement>) => {
-    const val = 'value' in e.currentTarget ? parseFloat(e.currentTarget.value) : dragTime;
-    const safeTarget = isNaN(val) ? 0 : val;
+  const handlePointerUp = () => {
+    if (!isDragging) return;
+    const safeTarget = isNaN(dragTime) ? 0 : dragTime;
     seek(safeTarget);
     setIsDragging(false);
-  };
-
-  const handleAudioEnded = () => {
-    if (repeatMode === 'one') {
-      if (audioRef.current) {
-        audioRef.current.currentTime = 0;
-        audioRef.current.play().catch(() => {});
-      }
-    } else {
-      next();
-    }
   };
 
   return (
     <>
       {/* Primary Recitation Audio Element */}
       <audio
-        ref={audioRef}
+        ref={handleAudioRef}
+        data-quran-audio="true"
         src={currentTrack.audioUrl}
         preload="metadata"
-        onTimeUpdate={() => {
-          if (audioRef.current && !audioManager.isSeeking()) {
-            updateProgress(audioRef.current.currentTime, audioRef.current.duration);
+        onTimeUpdate={(e) => {
+          const el = e.currentTarget;
+          if (!audioManager.isSeeking()) {
+            updateProgress(el.currentTime, el.duration);
           }
         }}
-        onLoadedMetadata={() => {
-          if (audioRef.current) {
-            audioRef.current.playbackRate = playbackSpeed;
-            updateProgress(audioRef.current.currentTime, audioRef.current.duration);
-            if (isPlaying) audioRef.current.play().catch(() => {});
+        onLoadedMetadata={(e) => {
+          const el = e.currentTarget;
+          el.playbackRate = playbackSpeed;
+          updateProgress(el.currentTime, el.duration);
+          if (isPlaying && el.paused) {
+            el.play().catch(() => {});
           }
         }}
-        onEnded={handleAudioEnded}
+        onDurationChange={(e) => {
+          const el = e.currentTarget;
+          updateProgress(el.currentTime, el.duration);
+        }}
+        onCanPlay={(e) => {
+          const el = e.currentTarget;
+          updateProgress(el.currentTime, el.duration);
+          if (isPlaying && el.paused) {
+            el.play().catch(() => {});
+          }
+        }}
+        onEnded={() => {
+          handleTrackEnded(currentTrack.audioUrl);
+        }}
+        onError={() => {
+          handleAudioError(currentTrack.audioUrl);
+        }}
       />
 
-      {/* Secondary Ambient Loop Audio Element */}
-      <audio
-        ref={ambientAudioRef}
-        src={ambientAudioUrl}
-        loop
-        preload="auto"
-      />
+      {/* Secondary Ambient Loop Audio Element - Only render when valid URL exists */}
+      {ambientAudioUrl ? (
+        <audio
+          ref={(node) => {
+            ambientAudioRef.current = node;
+            audioManager.registerAmbientElement(node);
+          }}
+          src={ambientAudioUrl}
+          loop
+          preload="auto"
+        />
+      ) : null}
 
       {/* Persistent Floating Bottom Bar */}
       <div className="fixed inset-x-0 bottom-[calc(3.5rem+max(0.35rem,env(safe-area-inset-bottom,0px)))] md:bottom-0 z-player-dock p-2 md:p-3 pointer-events-none">
@@ -357,25 +398,24 @@ export default function AudioPlayer() {
 
             {/* Scrubber slider */}
             <div className="w-full flex items-center gap-2.5 text-[11px] text-theme-muted font-mono">
-              <span className="w-8 text-right shrink-0">{formatTime(effectiveTime)}</span>
+              <span className="w-10 text-right shrink-0">{formatAudioTime(effectiveTime)}</span>
               <div className="relative flex-1 flex items-center group">
                 <input
                   type="range"
                   min={0}
-                  max={duration || 100}
+                  max={duration > 0 ? duration : 100}
                   step={0.1}
                   value={effectiveTime}
                   onPointerDown={handlePointerDown}
                   onTouchStart={handlePointerDown}
-                  onInput={handleInput}
-                  onChange={handleSeekCommit}
-                  onPointerUp={handleSeekCommit}
-                  onTouchEnd={handleSeekCommit}
+                  onChange={handleSliderChange}
+                  onPointerUp={handlePointerUp}
+                  onTouchEnd={handlePointerUp}
                   aria-label="Quran playback seeker"
                   className="w-full h-1 bg-theme-elevated border border-theme-subtle rounded-lg appearance-none cursor-pointer accent-emerald-600 hover:h-1.5 transition-all"
                 />
               </div>
-              <span className="w-8 shrink-0">{formatTime(duration)}</span>
+              <span className="w-10 shrink-0">{formatAudioDuration(duration)}</span>
             </div>
           </div>
 

@@ -19,8 +19,8 @@ export default function CollectionDetailView({ slug }: CollectionDetailViewProps
     currentTrack,
     isPlaying,
     favorites,
-    playSurah,
-    setQueue,
+    playPlaylist,
+    togglePlay,
     toggleFavorite,
   } = usePlayerStore();
 
@@ -31,17 +31,15 @@ export default function CollectionDetailView({ slug }: CollectionDetailViewProps
   const reciter = RECITERS.find((r) => r.id === collection.reciterId) || RECITERS[0];
   const collectionSurahs = SURAHS.filter((s) => collection.surahNumbers.includes(s.number));
 
+  const collectionTracks: Track[] = collectionSurahs.map((s) => ({
+    surah: s,
+    reciter,
+    audioUrl: getSurahAudioUrl(reciter, s.number),
+  }));
+
   const handlePlayAll = () => {
-    if (collectionSurahs.length === 0) return;
-
-    const tracks: Track[] = collectionSurahs.slice(1).map((s) => ({
-      surah: s,
-      reciter,
-      audioUrl: getSurahAudioUrl(reciter, s.number),
-    }));
-
-    setQueue(tracks);
-    playSurah(collectionSurahs[0], reciter);
+    if (collectionTracks.length === 0) return;
+    playPlaylist(collectionTracks, 0);
   };
 
   return (
@@ -101,10 +99,18 @@ export default function CollectionDetailView({ slug }: CollectionDetailViewProps
               currentTrack?.reciter.id === reciter.id;
             const isFav = favorites.includes(surah.number);
 
+            const handleTrackClick = () => {
+              if (isTrackActive) {
+                togglePlay();
+              } else {
+                playPlaylist(collectionTracks, idx);
+              }
+            };
+
             return (
               <div
                 key={surah.number}
-                onClick={() => playSurah(surah, reciter)}
+                onClick={handleTrackClick}
                 className={`group flex items-center justify-between p-3.5 rounded-2xl cursor-pointer transition-all ${
                   isTrackActive
                     ? 'bg-emerald-500/15 border border-emerald-500 shadow-sm'

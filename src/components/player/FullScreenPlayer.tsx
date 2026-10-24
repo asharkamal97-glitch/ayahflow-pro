@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { usePlayerStore } from '@/store/usePlayerStore';
 import { useTafsirSyncStore } from '@/store/useTafsirSyncStore';
 import { PLAYBACK_SPEEDS, TAFSIRS } from '@/lib/constants';
+import { formatAudioTime, formatAudioDuration } from '@/lib/audioManager';
 import {
   ChevronDown,
   Play,
@@ -35,6 +36,7 @@ export const FullScreenPlayer: React.FC = () => {
     next,
     previous,
     seek,
+    skipBy,
     favorites,
     toggleFavorite,
     isFullScreenPlayerOpen,
@@ -72,13 +74,6 @@ export const FullScreenPlayer: React.FC = () => {
   const isFav = favorites.includes(currentTrack.surah.number);
   const isDownloaded = downloadedSurahs.includes(currentTrack.surah.number);
 
-  const formatTime = (secs: number) => {
-    if (isNaN(secs) || secs < 0) return '0:00';
-    const m = Math.floor(secs / 60);
-    const s = Math.floor(secs % 60);
-    return `${m}:${s.toString().padStart(2, '0')}`;
-  };
-
   const effectiveTime = isDragging ? dragTime : currentTime;
   const progressPercent = duration > 0 ? Math.min(100, Math.max(0, (effectiveTime / duration) * 100)) : 0;
 
@@ -91,14 +86,18 @@ export const FullScreenPlayer: React.FC = () => {
     setDragTime(currentTime);
   };
 
-  const handleInput = (e: React.FormEvent<HTMLInputElement>) => {
-    const val = parseFloat(e.currentTarget.value);
-    setDragTime(val);
+  const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = parseFloat(e.target.value);
+    if (isDragging) {
+      setDragTime(isNaN(val) ? 0 : val);
+    } else {
+      seek(isNaN(val) ? 0 : val);
+    }
   };
 
-  const handleSeekCommit = (e: React.ChangeEvent<HTMLInputElement> | React.PointerEvent<HTMLInputElement> | React.TouchEvent<HTMLInputElement>) => {
-    const val = 'value' in e.currentTarget ? parseFloat(e.currentTarget.value) : dragTime;
-    const safeTarget = isNaN(val) ? 0 : val;
+  const handlePointerUp = () => {
+    if (!isDragging) return;
+    const safeTarget = isNaN(dragTime) ? 0 : dragTime;
     seek(safeTarget);
     setIsDragging(false);
   };
@@ -354,23 +353,22 @@ export const FullScreenPlayer: React.FC = () => {
             <input
               type="range"
               min={0}
-              max={duration || 100}
+              max={duration > 0 ? duration : 100}
               step={0.1}
               value={effectiveTime}
               onPointerDown={handlePointerDown}
               onTouchStart={handlePointerDown}
-              onInput={handleInput}
-              onChange={handleSeekCommit}
-              onPointerUp={handleSeekCommit}
-              onTouchEnd={handleSeekCommit}
+              onChange={handleSliderChange}
+              onPointerUp={handlePointerUp}
+              onTouchEnd={handlePointerUp}
               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
               aria-label="Quran playback progress scrubber"
             />
           </div>
 
           <div className="flex justify-between text-xs text-theme-muted font-mono">
-            <span>{formatTime(effectiveTime)}</span>
-            <span>{formatTime(duration)}</span>
+            <span>{formatAudioTime(effectiveTime)}</span>
+            <span>{formatAudioDuration(duration)}</span>
           </div>
         </div>
 
@@ -378,7 +376,7 @@ export const FullScreenPlayer: React.FC = () => {
         <div className="flex items-center justify-center gap-6 md:gap-8">
           <button
             type="button"
-            onClick={() => seek(Math.max(0, currentTime - 10))}
+            onClick={() => skipBy(-10)}
             className="p-2 text-theme-secondary hover:text-theme-primary transition-colors cursor-pointer active:scale-95"
             title="Rewind 10 seconds"
           >
@@ -418,7 +416,7 @@ export const FullScreenPlayer: React.FC = () => {
 
           <button
             type="button"
-            onClick={() => seek(Math.min(duration, currentTime + 10))}
+            onClick={() => skipBy(10)}
             className="p-2 text-theme-secondary hover:text-theme-primary transition-colors cursor-pointer active:scale-95"
             title="Forward 10 seconds"
           >

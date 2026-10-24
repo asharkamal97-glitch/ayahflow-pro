@@ -13,6 +13,26 @@ const SEEK_TIMEOUT_MS = 5000;
 const METADATA_TIMEOUT_MS = 15000;
 const END_EPSILON_SECONDS = 0.25;
 
+export function formatAudioTime(seconds: number): string {
+  if (!Number.isFinite(seconds) || seconds < 0) return '0:00';
+  const total = Math.floor(seconds);
+  const hrs = Math.floor(total / 3600);
+  const mins = Math.floor((total % 3600) / 60);
+  const secs = total % 60;
+  const secsStr = secs < 10 ? `0${secs}` : `${secs}`;
+
+  if (hrs > 0) {
+    const minsStr = mins < 10 ? `0${mins}` : `${mins}`;
+    return `${hrs}:${minsStr}:${secsStr}`;
+  }
+  return `${mins}:${secsStr}`;
+}
+
+export function formatAudioDuration(seconds: number): string {
+  if (!Number.isFinite(seconds) || seconds <= 0) return '--:--';
+  return formatAudioTime(seconds);
+}
+
 /** Owns the single recitation element and reports its real media position. */
 export class AudioManager {
   private audioElement: HTMLAudioElement | null = null;
@@ -22,15 +42,32 @@ export class AudioManager {
   private pendingSeekTimeout: ReturnType<typeof setTimeout> | null = null;
   private pendingSeekTarget: number | null = null;
   private progressCallbacks = new Set<ProgressCallback>();
+  private endedCallbacks = new Set<() => void>();
+  private errorCallbacks = new Set<(error: MediaError | null) => void>();
   private eventHandlers: Array<{ event: string; handler: EventListener }> = [];
+  private isEndingHandled = false;
+
+  public getAudioElement(): HTMLAudioElement | null {
+    if (!this.audioElement && typeof document !== 'undefined') {
+      const el = document.querySelector('audio[data-quran-audio="true"]') as HTMLAudioElement | null;
+      if (el) {
+        this.registerAudioElement(el);
+      }
+    }
+    return this.audioElement;
+  }
 
   public registerAudioElement(element: HTMLAudioElement | null) {
-    if (this.audioElement === element) return;
+    if (this.audioElement === element) {
+      if (element) this.notifyProgress();
+      return;
+    }
     this.detachAudioListeners();
     this.clearSeekTimers();
     this.audioElement = element;
     this.pendingSeekTarget = null;
     this.isSeekingLocked = false;
+    this.isEndingHandled = false;
 
     if (!element) return;
 
@@ -48,22 +85,40 @@ export class AudioManager {
       this.clearSeekLockTimeout();
       this.notifyProgress();
     });
-    this.listen(element, 'loadedmetadata', () => this.applyPendingSeekOrNotify());
+    this.listen(element, 'loadedmetadata', () => {
+      this.isEndingHandled = false;
+      this.applyPendingSeekOrNotify();
+    });
     this.listen(element, 'durationchange', () => this.applyPendingSeekOrNotify());
     this.listen(element, 'loadeddata', () => this.applyPendingSeekOrNotify());
-    this.listen(element, 'canplay', () => this.applyPendingSeekOrNotify());
+    this.listen(element, 'canplay', () => {
+      this.isEndingHandled = false;
+      this.applyPendingSeekOrNotify();
+    });
     this.listen(element, 'progress', () => this.applyPendingSeekOrNotify());
     this.listen(element, 'emptied', () => {
       this.clearPendingSeek();
       this.isSeekingLocked = false;
       this.clearSeekLockTimeout();
+      this.isEndingHandled = false;
       this.notifyProgress();
+    });
+    this.listen(element, 'ended', () => {
+      if (this.isEndingHandled || this.isSeekingLocked) return;
+      this.isEndingHandled = true;
+      this.endedCallbacks.forEach((cb) => cb());
+      setTimeout(() => {
+        this.isEndingHandled = false;
+      }, 500);
     });
     this.listen(element, 'error', () => {
       this.clearPendingSeek();
       this.isSeekingLocked = false;
       this.clearSeekLockTimeout();
+      this.isEndingHandled = false;
       this.notifyProgress();
+      const mediaError = element.error;
+      this.errorCallbacks.forEach((cb) => cb(mediaError));
     });
 
     this.notifyProgress();
@@ -113,10 +168,6 @@ export class AudioManager {
     this.ambientElement = element;
   }
 
-  public getAudioElement(): HTMLAudioElement | null {
-    return this.audioElement;
-  }
-
   public getAmbientElement(): HTMLAudioElement | null {
     return this.ambientElement;
   }
@@ -128,6 +179,16 @@ export class AudioManager {
   public onProgress(callback: ProgressCallback): () => void {
     this.progressCallbacks.add(callback);
     return () => this.progressCallbacks.delete(callback);
+  }
+
+  public onEnded(callback: () => void): () => void {
+    this.endedCallbacks.add(callback);
+    return () => this.endedCallbacks.delete(callback);
+  }
+
+  public onError(callback: (error: MediaError | null) => void): () => void {
+    this.errorCallbacks.add(callback);
+    return () => this.errorCallbacks.delete(callback);
   }
 
   private readSeekableRanges(element: HTMLAudioElement): SeekRange[] {
@@ -152,7 +213,7 @@ export class AudioManager {
   }
 
   public notifyProgress() {
-    const element = this.audioElement;
+    const element = this.getAudioElement();
     if (!element) return;
     const currentTime = Number.isFinite(element.currentTime) ? Math.max(0, element.currentTime) : 0;
     const duration = this.readDuration(element);
@@ -166,7 +227,7 @@ export class AudioManager {
    * to the media element.
    */
   public seek(targetSeconds: number): AudioSeekResult {
-    const element = this.audioElement;
+    const element = this.getAudioElement();
     if (!element) return { status: 'rejected', target: null, reason: 'No active audio element' };
     if (!Number.isFinite(targetSeconds)) {
       return { status: 'rejected', target: null, reason: 'Seek target must be finite' };
@@ -202,7 +263,7 @@ export class AudioManager {
   }
 
   private applySeek(targetSeconds: number): AudioSeekResult {
-    const element = this.audioElement;
+    const element = this.getAudioElement();
     if (!element) return { status: 'rejected', target: null, reason: 'No active audio element' };
     if (element.readyState < HAVE_METADATA) return { status: 'queued', target: targetSeconds };
 
@@ -215,15 +276,11 @@ export class AudioManager {
     const lastRange = ranges.length > 0 ? ranges[ranges.length - 1] : null;
     const mediaEnd = finiteDuration ?? (lastRange ? lastRange.end : null);
 
-    if (mediaEnd === null && ranges.length === 0) {
-      return { status: 'rejected', target: null, reason: 'The media element has no duration or seekable range' };
-    }
-
     let target = Math.max(0, targetSeconds);
     if (firstRange && target < firstRange.start && finiteDuration === null) {
       target = firstRange.start;
     }
-    if (mediaEnd !== null) {
+    if (mediaEnd !== null && mediaEnd > 0) {
       target = Math.min(target, mediaEnd);
     }
 
@@ -245,28 +302,60 @@ export class AudioManager {
     return { status: 'applied', target: Number.isFinite(element.currentTime) ? element.currentTime : target };
   }
 
-  public play(): Promise<void> {
-    if (!this.audioElement) return Promise.resolve();
-    return this.audioElement.play();
+  public async playRecitation(url?: string): Promise<boolean> {
+    const element = this.getAudioElement();
+    if (!element) return false;
+    this.isEndingHandled = false;
+
+    if (url && element.src !== url && !element.src.endsWith(url)) {
+      element.src = url;
+      element.load();
+    }
+
+    try {
+      await element.play();
+      return true;
+    } catch (err: any) {
+      if (err?.name === 'AbortError') {
+        // Harmless browser interruption during rapid track switching or source reload
+        return false;
+      }
+      console.warn('Recitation playback interrupted or prevented by browser:', err);
+      if (err?.name === 'NotAllowedError') {
+        this.errorCallbacks.forEach((cb) => cb(null));
+      }
+      return false;
+    }
+  }
+
+  public pauseRecitation(): void {
+    const element = this.getAudioElement();
+    if (!element) return;
+    element.pause();
+  }
+
+  public play(url?: string): Promise<boolean> {
+    return this.playRecitation(url);
   }
 
   public pause(): void {
-    if (!this.audioElement) return;
-    this.audioElement.pause();
+    this.pauseRecitation();
   }
 
   public setVolume(volume: number, isMuted: boolean): void {
-    if (!this.audioElement) return;
-    this.audioElement.volume = isMuted ? 0 : Math.max(0, Math.min(1, volume));
+    const element = this.getAudioElement();
+    if (!element) return;
+    element.volume = isMuted ? 0 : Math.max(0, Math.min(1, volume));
   }
 
-    public setPlaybackSpeed(speed: number) {
+  public setPlaybackSpeed(speed: number) {
     this.setPlaybackRate(speed);
   }
 
   public setPlaybackRate(rate: number): void {
-    if (!this.audioElement) return;
-    this.audioElement.playbackRate = rate;
+    const element = this.getAudioElement();
+    if (!element) return;
+    element.playbackRate = rate;
   }
 }
 
