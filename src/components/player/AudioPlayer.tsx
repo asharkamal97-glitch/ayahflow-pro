@@ -294,7 +294,7 @@ export default function AudioPlayer() {
       ) : null}
 
       {/* Persistent Floating Bottom Bar */}
-      <div className="fixed inset-x-0 bottom-[calc(3.5rem+max(0.35rem,env(safe-area-inset-bottom,0px)))] md:bottom-0 z-player-dock p-2 md:p-3 pointer-events-none">
+      <div className="fixed inset-x-0 bottom-[calc(3.85rem+max(0.5rem,env(safe-area-inset-bottom,0px)))] md:bottom-0 z-player-dock p-2 md:p-3 pointer-events-none">
         <div className="max-w-7xl mx-auto rounded-[28px] md:rounded-[32px] glass-panel bg-theme-surface/95 backdrop-blur-2xl border border-theme-subtle px-4 py-2.5 md:px-6 md:py-3.5 shadow-2xl flex items-center justify-between gap-3 md:gap-8 pointer-events-auto">
           {/* Left: Track Info & Expand Button */}
           <div className="flex items-center gap-3 min-w-0 md:w-1/4">

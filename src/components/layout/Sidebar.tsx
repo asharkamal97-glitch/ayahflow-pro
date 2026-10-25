@@ -6,10 +6,14 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Home, Library, Mic2, Search, Flame, Download, Heart, User, LogIn, Settings } from 'lucide-react';
 import { usePlayerStore } from '@/store/usePlayerStore';
+import { usePlatform } from '@/lib/usePlatform';
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const { isNative } = usePlatform();
   const { insights, downloadedSurahs } = usePlayerStore();
+
+  if (isNative) return null;
 
   const navItems = [
     { label: 'Home', href: '/', icon: Home },

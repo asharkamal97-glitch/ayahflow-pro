@@ -17,7 +17,7 @@ interface ApkInstallGuideProps {
 }
 
 export default function ApkInstallGuide({
-  apkUrl = 'https://github.com/asharkamal97-glitch/ayahflow-pro/releases/download/v1.0.0/app-release.apk',
+  apkUrl = 'https://github.com/asharkamal97-glitch/ayahflow-pro/releases/latest/download/app-release.apk',
   className = '',
 }: ApkInstallGuideProps) {
   const [troubleshootOpen, setTroubleshootOpen] = useState(false);

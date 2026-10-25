@@ -17,8 +17,10 @@ import TrustStrip from '@/components/apk/TrustStrip';
 import ApkInstallGuide from '@/components/apk/ApkInstallGuide';
 import ScreenshotGallery from '@/components/gallery/ScreenshotGallery';
 import { trackApkDownloadClick } from '@/lib/analytics';
+import { usePlatform } from '@/lib/usePlatform';
 
 export default function DownloadsPage() {
+  const { isNative } = usePlatform();
   const { downloadedSurahs, toggleDownloadedSurah, playSurah } = usePlayerStore();
 
   const downloadedList = SURAHS.filter((s) => downloadedSurahs.includes(s.number));
@@ -54,56 +56,60 @@ export default function DownloadsPage() {
         </div>
       </div>
 
-      {/* MOBILE ANDROID APP APK DOWNLOAD SECTION */}
-      <div className="relative overflow-hidden rounded-3xl spatial-glass-card p-6 md:p-8 border border-theme-subtle shadow-xl">
-        <div className="flex flex-col gap-4 max-w-3xl">
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25">
-              Official Android APK
-            </span>
-            <span className="text-[11px] font-mono text-theme-muted">
-              v1.0.0 • 57.8 MB
-            </span>
-          </div>
+      {/* MOBILE ANDROID APP APK DOWNLOAD SECTION (Website Only) */}
+      {!isNative && (
+        <>
+          <div className="relative overflow-hidden rounded-3xl spatial-glass-card p-6 md:p-8 border border-theme-subtle shadow-xl">
+            <div className="flex flex-col gap-4 max-w-3xl">
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25">
+                  Official Android APK
+                </span>
+                <span className="text-[11px] font-mono text-theme-muted">
+                  v1.0.0 • 144 MB
+                </span>
+              </div>
 
-          <h2 className="text-xl md:text-3xl font-bold tracking-tight text-theme-primary">
-            AyahFlow Pro for Android
-          </h2>
-          <p className="text-xs md:text-sm text-theme-secondary leading-relaxed">
-            Experience flawless lock-screen audio playback, hardware media notification controls, background ambient atmosphere mixing, and instant offline access on your phone.
-          </p>
+              <h2 className="text-xl md:text-3xl font-bold tracking-tight text-theme-primary">
+                AyahFlow Pro for Android
+              </h2>
+              <p className="text-xs md:text-sm text-theme-secondary leading-relaxed">
+                Experience flawless lock-screen audio playback, hardware media notification controls, background ambient atmosphere mixing, and instant offline access on your phone.
+              </p>
 
-          <div className="flex flex-wrap items-center gap-3 pt-2">
-            <div className="flex flex-col gap-1.5">
-              <a
-                href={process.env.NEXT_PUBLIC_ANDROID_APK_URL || 'https://github.com/asharkamal97-glitch/ayahflow-pro/releases/download/v1.0.0/app-release.apk'}
-                download="app-release.apk"
-                onClick={() => trackApkDownloadClick('downloads_page')}
-                className="px-6 py-3 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs md:text-sm hover:scale-105 active:scale-95 transition-all shadow-lg shadow-emerald-600/25 flex items-center gap-2"
-              >
-                <Download className="w-4 h-4" />
-                <span>Download APK for Android</span>
-              </a>
-              <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 pl-2">
-                Free • No ads • Privacy-friendly analytics
-              </span>
+              <div className="flex flex-wrap items-center gap-3 pt-2">
+                <div className="flex flex-col gap-1.5">
+                  <a
+                    href={process.env.NEXT_PUBLIC_ANDROID_APK_URL || 'https://github.com/asharkamal97-glitch/ayahflow-pro/releases/latest/download/app-release.apk'}
+                    download="app-release.apk"
+                    onClick={() => trackApkDownloadClick('downloads_page')}
+                    className="px-6 py-3 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs md:text-sm hover:scale-105 active:scale-95 transition-all shadow-lg shadow-emerald-600/25 flex items-center gap-2"
+                  >
+                    <Download className="w-4 h-4" />
+                    <span>Download APK for Android</span>
+                  </a>
+                  <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 pl-2">
+                    Free • No ads • Privacy-friendly analytics
+                  </span>
+                </div>
+
+                <span className="text-xs text-theme-muted flex items-center gap-1 self-start sm:self-center mt-1 sm:mt-0">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                  <span>Direct Install • Clean & Safe</span>
+                </span>
+              </div>
+
+              <TrustStrip variant="compact" className="mt-2" />
             </div>
-
-            <span className="text-xs text-theme-muted flex items-center gap-1 self-start sm:self-center mt-1 sm:mt-0">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-              <span>Direct Install • Clean & Safe</span>
-            </span>
           </div>
 
-          <TrustStrip variant="compact" className="mt-2" />
-        </div>
-      </div>
+          {/* DETAILED APK INSTALLATION & TROUBLESHOOTING GUIDE */}
+          <ApkInstallGuide apkUrl={process.env.NEXT_PUBLIC_ANDROID_APK_URL || 'https://github.com/asharkamal97-glitch/ayahflow-pro/releases/latest/download/app-release.apk'} />
 
-      {/* DETAILED APK INSTALLATION & TROUBLESHOOTING GUIDE */}
-      <ApkInstallGuide apkUrl={process.env.NEXT_PUBLIC_ANDROID_APK_URL || 'https://github.com/asharkamal97-glitch/ayahflow-pro/releases/download/v1.0.0/app-release.apk'} />
-
-      {/* REAL APP SCREENSHOT GALLERY */}
-      <ScreenshotGallery />
+          {/* REAL APP SCREENSHOT GALLERY */}
+          <ScreenshotGallery />
+        </>
+      )}
 
       {/* Downloaded Surah List */}
       {downloadedList.length === 0 ? (

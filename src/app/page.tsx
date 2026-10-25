@@ -25,8 +25,12 @@ import TrustStrip from '@/components/apk/TrustStrip';
 import ApkInstallGuide from '@/components/apk/ApkInstallGuide';
 import ScreenshotGallery from '@/components/gallery/ScreenshotGallery';
 import { trackApkDownloadClick } from '@/lib/analytics';
+import { usePlatform } from '@/lib/usePlatform';
+import MobileAppHome from '@/components/home/MobileAppHome';
 
 export default function HomePage() {
+  const { isNative } = usePlatform();
+
   const {
     currentTrack,
     isPlaying,
@@ -62,7 +66,11 @@ export default function HomePage() {
   };
 
   const tajwidReciters = RECITERS.filter((r) => r.tags?.includes('tajwid'));
-  const apkUrl = process.env.NEXT_PUBLIC_ANDROID_APK_URL || 'https://github.com/asharkamal97-glitch/ayahflow-pro/releases/download/v1.0.0/app-release.apk';
+  const apkUrl = process.env.NEXT_PUBLIC_ANDROID_APK_URL || 'https://github.com/asharkamal97-glitch/ayahflow-pro/releases/latest/download/app-release.apk';
+
+  if (isNative) {
+    return <MobileAppHome />;
+  }
 
   return (
     <div className="flex flex-col gap-8 md:gap-10 px-4 md:px-10 py-6 md:py-8 max-w-7xl mx-auto w-full pb-32">
@@ -300,7 +308,7 @@ export default function HomePage() {
                   download="app-release.apk"
                   onClick={() => trackApkDownloadClick('hero_cta')}
                   className="px-5 py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs md:text-sm hover:scale-105 active:scale-95 transition-all shadow-lg shadow-emerald-600/25 flex items-center gap-2"
-                  title="Direct Android APK Download (57.8 MB)"
+                  title="Direct Android APK Download (144 MB)"
                 >
                   <Smartphone className="w-4 h-4" />
                   <span>Download for Android (APK)</span>
