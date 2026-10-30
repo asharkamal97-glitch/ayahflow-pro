@@ -32,7 +32,9 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-const SITE_URL = "https://ayahflow-quranify.vercel.app/";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL
+  ? (process.env.NEXT_PUBLIC_SITE_URL.endsWith('/') ? process.env.NEXT_PUBLIC_SITE_URL : `${process.env.NEXT_PUBLIC_SITE_URL}/`)
+  : "https://ayahflow.tech/";
 const OG_BANNER_URL = `${SITE_URL}og-banner.png`;
 
 export const metadata: Metadata = {
@@ -134,7 +136,7 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": "WebApplication",
               name: "AyahFlow Pro",
-              url: "https://ayahflow-quranify.vercel.app/",
+              url: SITE_URL,
               applicationCategory: "MultimediaApplication",
               operatingSystem: "All",
               featureList: [

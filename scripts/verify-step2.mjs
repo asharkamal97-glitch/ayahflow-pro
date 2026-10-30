@@ -61,7 +61,7 @@ server.listen(3088, async () => {
     const homeRes = await fetch('http://localhost:3088/');
     const homeHtml = await homeRes.text();
     console.log('Homepage HTTP Status:            ', homeRes.status);
-    console.log('Homepage contains correct banner:', homeHtml.includes('https://ayahflow-quranify.vercel.app/og-banner.png'));
+    console.log('Homepage contains correct banner:', homeHtml.includes('https://ayahflow.tech/og-banner.png'));
   } finally {
     server.close();
   }

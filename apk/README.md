@@ -7,8 +7,8 @@ This directory contains the standalone Android installation package (**APK**) fo
 - **Direct GitHub Raw Download**:  
   [Download AyahFlow-Pro.apk (v1.0.0)](https://github.com/asharkamal97-glitch/ayahflow-pro/raw/main/apk/AyahFlow-Pro.apk)
 
-- **High-Speed CDN Mirror**:  
-  [https://quranify-alpha.vercel.app/ayahflow-pro.apk](https://quranify-alpha.vercel.app/ayahflow-pro.apk)
+- **Official Web Downloads**:  
+  [https://ayahflow.tech/downloads/](https://ayahflow.tech/downloads/)
 
 ---
 

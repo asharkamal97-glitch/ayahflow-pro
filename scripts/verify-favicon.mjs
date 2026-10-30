@@ -34,8 +34,8 @@ console.log(`5. Generated HTML has no old favicon.ico link: ${!hasOldFaviconLink
 // 6. Check preservation of existing metadata
 const hasTitle = html.includes('AyahFlow — Quran Recitation with Rain &amp; Ocean Sounds');
 const hasOgTitle = html.includes('AyahFlow — Quran Recitation + Ambient Sounds');
-const hasOgImage = html.includes('https://ayahflow-quranify.vercel.app/og-banner.png');
-const hasCanonical = html.includes('https://ayahflow-quranify.vercel.app/');
+const hasOgImage = html.includes('https://ayahflow.tech/og-banner.png');
+const hasCanonical = html.includes('https://ayahflow.tech/');
 
 console.log(`6. Preserved Page Title: ${hasTitle ? 'PASS' : 'FAIL'}`);
 console.log(`7. Preserved Open Graph Title: ${hasOgTitle ? 'PASS' : 'FAIL'}`);

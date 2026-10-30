@@ -1,7 +1,7 @@
 # AyahFlow Pro (آية فلو) 📖✨
 > *Listen. Reflect. Find Peace.*
 
-[![Live Web App](https://img.shields.io/badge/Live%20Demo-Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://quranify-alpha.vercel.app)
+[![Live Web App](https://img.shields.io/badge/Live%20Demo-ayahflow.tech-059669?style=for-the-badge&logo=googlechrome&logoColor=white)](https://ayahflow.tech)
 [![Download Android APK](https://img.shields.io/badge/Download%20APK-Android%20v1.0.0-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://github.com/asharkamal97-glitch/ayahflow-pro/raw/main/apk/AyahFlow-Pro.apk)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge)](LICENSE)
 
@@ -15,8 +15,8 @@ You can download and install the standalone Android application directly without
 
 | Download Source | Link | Notes |
 | :--- | :--- | :--- |
-| **Direct GitHub Download** | [⬇️ **Download AyahFlow-Pro.apk**](https://github.com/asharkamal97-glitch/ayahflow-pro/raw/main/apk/AyahFlow-Pro.apk) | Direct raw binary from repository (~27.9 MB) |
-| **Fast Web Mirror** | [🌐 **Download via Vercel CDN**](https://quranify-alpha.vercel.app/ayahflow-pro.apk) | Accelerated global edge download |
+| **Official Release Download** | [⬇️ **Download app-release.apk (v1.0.1)**](https://github.com/asharkamal97-glitch/ayahflow-pro/releases/latest/download/app-release.apk) | Verified GitHub Release standalone package |
+| **Official Web Downloads** | [🌐 **Visit Downloads Page**](https://ayahflow.tech/downloads/) | Web downloads, installation guides, and storage manager |
 | **Repository File** | [`apk/AyahFlow-Pro.apk`](apk/AyahFlow-Pro.apk) | Browse file directly in repository |
 
 ### How to Install the APK on your Android Device:
@@ -30,7 +30,7 @@ You can download and install the standalone Android application directly without
 ## 🌐 Live Web Experience
 
 The web version of **AyahFlow Pro** is live:
-👉 **[https://quranify-alpha.vercel.app](https://quranify-alpha.vercel.app)**
+👉 **[https://ayahflow.tech](https://ayahflow.tech)**
 
 ---
 

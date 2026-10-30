@@ -3,8 +3,8 @@ import fs from 'fs';
 const html = fs.readFileSync('out/index.html', 'utf8');
 
 console.log('--- METADATA CHECKS ---');
-const hasCanonical = html.includes('href="https://ayahflow-quranify.vercel.app/"') && html.includes('rel="canonical"');
-console.log('Canonical URL https://ayahflow-quranify.vercel.app/:', hasCanonical);
+const hasCanonical = html.includes('href="https://ayahflow.tech/"') && html.includes('rel="canonical"');
+console.log('Canonical URL https://ayahflow.tech/:', hasCanonical);
 
 const ogUrl = (html.match(/<meta property="og:url"[^>]+>/) || [])[0];
 console.log('og:url tag:', ogUrl);

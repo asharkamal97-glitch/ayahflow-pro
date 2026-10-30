@@ -3,7 +3,9 @@ import { COLLECTIONS, RECITERS, SURAHS } from '@/lib/constants';
 
 export const dynamic = 'force-static';
 
-const BASE_URL = 'https://ayahflow-quranify.vercel.app';
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL
+  ? process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, '')
+  : 'https://ayahflow.tech';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
