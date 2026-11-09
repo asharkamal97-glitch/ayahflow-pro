@@ -87,6 +87,19 @@ export const metadata: Metadata = {
       "Listen to Quran recitation alongside calming rain, ocean waves and other ambient sounds.",
     images: [OG_BANNER_URL],
   },
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/favicon-32x32.png', type: 'image/png', sizes: '32x32' },
+      { url: '/favicon-16x16.png', type: 'image/png', sizes: '16x16' },
+      { url: '/icon.png', type: 'image/png', sizes: '512x512' },
+    ],
+    apple: [
+      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
+    shortcut: '/favicon.ico',
+  },
+  manifest: '/manifest.json',
 };
 
 export default function RootLayout({
@@ -97,6 +110,11 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className={`h-full bg-theme-app text-theme-primary ${inter.variable} ${amiri.variable}`}>
       <head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+        <link rel="manifest" href="/manifest.json" />
         {/* Anti-flicker theme hydration script */}
         <script
           dangerouslySetInnerHTML={{
