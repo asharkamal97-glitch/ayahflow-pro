@@ -6,7 +6,8 @@ import { notFound } from 'next/navigation';
 import { COLLECTIONS, SURAHS, RECITERS, getSurahAudioUrl } from '@/lib/constants';
 import { usePlayerStore } from '@/store/usePlayerStore';
 import { Track } from '@/types/quran';
-import { Play, Pause, ChevronLeft, Heart } from 'lucide-react';
+import { Play, Pause, ChevronLeft, Heart, ListPlus } from 'lucide-react';
+import { usePlaylistStore } from '@/store/usePlaylistStore';
 
 interface CollectionDetailViewProps {
   slug: string;
@@ -29,7 +30,9 @@ export default function CollectionDetailView({ slug }: CollectionDetailViewProps
   }
 
   const reciter = RECITERS.find((r) => r.id === collection.reciterId) || RECITERS[0];
-  const collectionSurahs = SURAHS.filter((s) => collection.surahNumbers.includes(s.number));
+  const collectionSurahs = collection.surahNumbers
+    .map((num) => SURAHS.find((s) => s.number === num))
+    .filter(Boolean) as (typeof SURAHS)[0][];
 
   const collectionTracks: Track[] = collectionSurahs.map((s) => ({
     surah: s,
@@ -158,6 +161,18 @@ export default function CollectionDetailView({ slug }: CollectionDetailViewProps
                     className="p-1.5 rounded-full text-theme-muted hover:text-rose-500 transition-colors cursor-pointer"
                   >
                     <Heart className={`w-3.5 h-3.5 ${isFav ? 'fill-rose-500 text-rose-500' : ''}`} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      usePlaylistStore.getState().setSelectedSurahForAdd(surah.number);
+                    }}
+                    className="p-1.5 rounded-full text-theme-muted hover:text-emerald-500 transition-colors cursor-pointer"
+                    title="Add to personal playlist"
+                    aria-label="Add to personal playlist"
+                  >
+                    <ListPlus className="w-3.5 h-3.5" />
                   </button>
                   <Link
                     href={`/surah/${surah.number}`}

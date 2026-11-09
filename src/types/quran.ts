@@ -84,3 +84,34 @@ export interface ListeningInsights {
   reciterListens: Record<string, number>;
   surahListens: Record<number, number>;
 }
+
+export interface UserPlaylist {
+  id: string;
+  name: string;
+  description?: string;
+  createdAt: number;
+  updatedAt: number;
+  surahNumbers: number[];
+  reciterId?: string; // Optional default reciter for this playlist
+}
+
+export interface UserProfile {
+  id: string;
+  email: string;
+  displayName: string;
+  createdAt: number;
+}
+
+export interface UserSession {
+  token: string;
+  userId: string;
+  expiresAt: number;
+}
+
+export interface UserAccountData {
+  playlists: UserPlaylist[];
+  favorites: number[];
+  downloadedSurahs: number[];
+  insights: ListeningInsights;
+  lastActivePlaylistId?: string | null;
+}

@@ -4,6 +4,7 @@ import { Surah, Reciter, Track, AmbientSound, ListeningInsights } from '@/types/
 import { SURAHS, RECITERS, getSurahAudioUrl, getCurrentTimeOfDayPeriod, AMBIENT_SOUNDS } from '@/lib/constants';
 import { audioManager } from '@/lib/audioManager';
 import { useTafsirSyncStore } from './useTafsirSyncStore';
+import { useAuthStore } from './useAuthStore';
 
 interface PlayerState {
   currentTrack: Track | null;
@@ -41,6 +42,15 @@ interface PlayerState {
 
   // Habit & Insights
   insights: ListeningInsights;
+
+  // Track Transition Lock (prevents duplicate advancement skipping tracks)
+  isTransitioningTrack: boolean;
+  lastTransitionTimestamp: number;
+  setTransitioningTrack: (isTransitioning: boolean) => void;
+
+  // Account Data Sync
+  hydrateAccountData: (data: Partial<{ favorites: number[]; downloadedSurahs: number[]; insights: ListeningInsights }>) => void;
+  resetToGuestData: () => void;
 
   // Actions
   playSurah: (surah: Surah, reciter?: Reciter) => void;
@@ -80,48 +90,29 @@ interface PlayerState {
   recordListeningTime: (seconds: number) => void;
 }
 
-const initialInsights: ListeningInsights = {
-  totalMinutesListened: 142,
-  currentStreak: 4,
-  bestStreak: 12,
-  lastListenedDate: new Date().toISOString().split('T')[0],
-  dailyMinutes: {
-    [new Date(Date.now() - 3 * 86400000).toISOString().split('T')[0]]: 25,
-    [new Date(Date.now() - 2 * 86400000).toISOString().split('T')[0]]: 40,
-    [new Date(Date.now() - 1 * 86400000).toISOString().split('T')[0]]: 35,
-    [new Date().toISOString().split('T')[0]]: 42,
-  },
+export const cleanInitialInsights: ListeningInsights = {
+  totalMinutesListened: 0,
+  currentStreak: 0,
+  bestStreak: 0,
+  lastListenedDate: null,
+  dailyMinutes: {},
   timeOfDayStats: {
-    afterFajr: 45,
-    morning: 20,
-    dhuhr: 15,
-    afternoon: 10,
-    afterMaghrib: 30,
-    evening: 18,
-    lateNight: 4,
+    afterFajr: 0,
+    morning: 0,
+    dhuhr: 0,
+    afternoon: 0,
+    afterMaghrib: 0,
+    evening: 0,
+    lateNight: 0,
   },
-  reciterListens: {
-    'yasser-al-dosari-sa': 68,
-    'mishari-rashid-al-afasy-kw': 44,
-    'abdul-basit-abd-us-samad-eg': 30,
-  },
-  surahListens: {
-    1: 15,
-    18: 38,
-    36: 29,
-    55: 22,
-    67: 38,
-  },
+  reciterListens: {},
+  surahListens: {},
 };
 
 export const usePlayerStore = create<PlayerState>()(
   persist(
     (set, get) => ({
-      currentTrack: {
-        surah: SURAHS[0], // Al-Fatihah
-        reciter: RECITERS[0], // Yasser Al-Dosari
-        audioUrl: getSurahAudioUrl(RECITERS[0], 1)
-      },
+      currentTrack: null,
       isPlaying: false,
       currentTime: 0,
       duration: 0,
@@ -135,7 +126,7 @@ export const usePlayerStore = create<PlayerState>()(
       playlistIndex: -1,
       sleepTimerEnd: null,
       sleepTimerMinutes: null,
-      favorites: [1, 2, 18, 36, 55, 67, 112, 113, 114],
+      favorites: [],
 
       // Mobile Enhancements
       playbackSpeed: 1.0,
@@ -152,10 +143,31 @@ export const usePlayerStore = create<PlayerState>()(
       selectedTafsirId: 'en-tafsir-ibn-kathir',
 
       // Offline
-      downloadedSurahs: [1, 18, 36, 67, 112, 113, 114],
+      downloadedSurahs: [],
 
       // Insights
-      insights: initialInsights,
+      insights: cleanInitialInsights,
+
+      // Track Transition Lock & Sync
+      isTransitioningTrack: false,
+      lastTransitionTimestamp: 0,
+      setTransitioningTrack: (isTransitioning) => set({ isTransitioningTrack: isTransitioning }),
+
+      hydrateAccountData: (data) => {
+        set((state) => ({
+          favorites: Array.isArray(data.favorites) ? data.favorites : state.favorites,
+          downloadedSurahs: Array.isArray(data.downloadedSurahs) ? data.downloadedSurahs : state.downloadedSurahs,
+          insights: data.insights || state.insights,
+        }));
+      },
+
+      resetToGuestData: () => {
+        set({
+          favorites: [],
+          downloadedSurahs: [],
+          insights: cleanInitialInsights,
+        });
+      },
 
       playSurah: (surah, reciter) => {
         const activeReciter = reciter || get().selectedReciter;
@@ -230,9 +242,20 @@ export const usePlayerStore = create<PlayerState>()(
       resume: () => set({ isPlaying: true }),
 
       handleTrackEnded: (fromAudioUrl) => {
-        const { currentTrack, repeatMode, playlist, playlistIndex, queue, isShuffle, selectedReciter } = get();
+        const { currentTrack, repeatMode, playlist, playlistIndex, queue, isShuffle, selectedReciter, isTransitioningTrack, lastTransitionTimestamp } = get();
         if (!currentTrack) return;
         if (fromAudioUrl && currentTrack.audioUrl !== fromAudioUrl) return;
+
+        // Transition guard: block duplicate or rapid re-triggering within 1200ms
+        const now = Date.now();
+        if (isTransitioningTrack || (lastTransitionTimestamp && now - lastTransitionTimestamp < 1200)) {
+          return;
+        }
+
+        set({ isTransitioningTrack: true, lastTransitionTimestamp: now });
+        setTimeout(() => {
+          set({ isTransitioningTrack: false });
+        }, 1200);
 
         // 1. Repeat single track mode
         if (repeatMode === 'one') {
@@ -500,11 +523,13 @@ export const usePlayerStore = create<PlayerState>()(
       toggleFavorite: (surahNumber) => {
         set((state) => {
           const exists = state.favorites.includes(surahNumber);
-          return {
-            favorites: exists
-              ? state.favorites.filter((id) => id !== surahNumber)
-              : [...state.favorites, surahNumber]
-          };
+          const updated = exists
+            ? state.favorites.filter((id) => id !== surahNumber)
+            : [...state.favorites, surahNumber];
+          if (typeof window !== 'undefined') {
+            useAuthStore.getState().saveUserData({ favorites: updated });
+          }
+          return { favorites: updated };
         });
       },
 
@@ -563,11 +588,13 @@ export const usePlayerStore = create<PlayerState>()(
       toggleDownloadedSurah: (surahNumber) => {
         set((state) => {
           const exists = state.downloadedSurahs.includes(surahNumber);
-          return {
-            downloadedSurahs: exists
-              ? state.downloadedSurahs.filter((num) => num !== surahNumber)
-              : [...state.downloadedSurahs, surahNumber]
-          };
+          const updated = exists
+            ? state.downloadedSurahs.filter((num) => num !== surahNumber)
+            : [...state.downloadedSurahs, surahNumber];
+          if (typeof window !== 'undefined') {
+            useAuthStore.getState().saveUserData({ downloadedSurahs: updated });
+          }
+          return { downloadedSurahs: updated };
         });
       },
 
@@ -605,33 +632,33 @@ export const usePlayerStore = create<PlayerState>()(
           }
         }
 
-        set({
-          insights: {
-            ...insights,
-            totalMinutesListened: insights.totalMinutesListened + minutes,
-            currentStreak,
-            bestStreak,
-            lastListenedDate: today,
-            dailyMinutes,
-            timeOfDayStats
-          }
-        });
+        const updatedInsights = {
+          ...insights,
+          totalMinutesListened: insights.totalMinutesListened + minutes,
+          currentStreak,
+          bestStreak,
+          lastListenedDate: today,
+          dailyMinutes,
+          timeOfDayStats
+        };
+
+        set({ insights: updatedInsights });
+        if (typeof window !== 'undefined') {
+          useAuthStore.getState().saveUserData({ insights: updatedInsights });
+        }
       }
     }),
     {
-      name: 'quranify-player-storage-v3',
+      name: 'ayahflow-player-preferences-v4',
       partialize: (state) => ({
         selectedReciter: state.selectedReciter,
         volume: state.volume,
         isMuted: state.isMuted,
         repeatMode: state.repeatMode,
         isShuffle: state.isShuffle,
-        favorites: state.favorites,
         playbackSpeed: state.playbackSpeed,
         ambientVolume: state.ambientVolume,
         selectedAmbientSound: state.selectedAmbientSound,
-        downloadedSurahs: state.downloadedSurahs,
-        insights: state.insights,
       })
     }
   )

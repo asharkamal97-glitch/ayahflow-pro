@@ -261,7 +261,10 @@
   font-family: var(--font-amiri), "Amiri", "Scheherazade New", "Traditional Arabic", "Noto Naskh Arabic", Tahoma, sans-serif;
 }
 
-/* Stacking Context Hierarchy (Fixes modal overlay underneath FullScreenPlayer) */
+/* Stacking Context Hierarchy (Fixes modal overlay underneath FullScreenPlayer & page cards) */
+.z-modal {
+  z-index: 99999 !important;
+}
 .z-player-modal {
   z-index: 9999 !important;
 }

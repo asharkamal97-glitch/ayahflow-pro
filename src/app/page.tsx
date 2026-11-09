@@ -3,17 +3,24 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePlayerStore } from '@/store/usePlayerStore';
+import { useAuthStore } from '@/store/useAuthStore';
+import { usePlaylistStore } from '@/store/usePlaylistStore';
 import { useThemeStore } from '@/store/useThemeStore';
 import { SURAHS, RECITERS, COLLECTIONS, AMBIENT_SOUNDS } from '@/lib/constants';
 import {
   Play,
   Pause,
+  User,
+  LogIn,
+  LogOut,
+  Plus,
   ChevronRight,
   Sparkles,
   Heart,
   Flame,
   Download,
   CheckCircle2,
+  ListPlus,
   Volume2,
   Sun,
   Moon,
@@ -53,6 +60,8 @@ export default function HomePage() {
   } = usePlayerStore();
 
   const { resolvedTheme, themePreference, setThemePreference } = useThemeStore();
+  const { currentUser, setAuthModalOpen, signOut } = useAuthStore();
+  const { setSelectedSurahForAdd } = usePlaylistStore();
 
   const isCurrentReciterPlaying = isPlaying && currentTrack?.reciter.id === selectedReciter.id;
 
@@ -111,6 +120,42 @@ export default function HomePage() {
             <Sparkles className="w-3.5 h-3.5 text-amber-500" />
             <span>Discover</span>
           </Link>
+
+          {/* Account & Personal Playlists Sign-In / User Profile Button */}
+          {currentUser ? (
+            <div className="flex items-center gap-1.5 pl-1 border-l border-theme-subtle">
+              <button
+                type="button"
+                onClick={() => setAuthModalOpen(true, 'signin')}
+                className="text-xs px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-semibold flex items-center gap-1.5 cursor-pointer hover:bg-emerald-500/20 transition-colors"
+                title={`Signed in as ${currentUser.email}`}
+              >
+                <User className="w-3.5 h-3.5" />
+                <span className="max-w-[100px] truncate">{currentUser.displayName}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  signOut();
+                  usePlayerStore.getState().resetToGuestData();
+                  usePlaylistStore.getState().loadPlaylists();
+                }}
+                className="p-1.5 rounded-full hover:bg-theme-elevated text-theme-muted hover:text-rose-500 transition-colors cursor-pointer"
+                title="Sign Out"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setAuthModalOpen(true, 'signin')}
+              className="text-xs px-3.5 py-2 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold flex items-center gap-1.5 transition-all shadow-md shadow-emerald-600/20 cursor-pointer active:scale-95 ml-1"
+            >
+              <LogIn className="w-3.5 h-3.5" />
+              <span>Sign In</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -364,14 +409,18 @@ export default function HomePage() {
           <div>
             <div className="flex items-center gap-2">
               <span className="font-bold text-sm md:text-base text-theme-primary">
-                {insights.currentStreak}-Day Quran Habit Streak!
+                {insights.currentStreak > 0
+                  ? `${insights.currentStreak}-Day Quran Habit Streak!`
+                  : 'Start Your Daily Quran Habit'}
               </span>
               <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                {insights.totalMinutesListened} mins total
+                {insights.totalMinutesListened > 0 ? `${insights.totalMinutesListened} mins total` : 'Day 1'}
               </span>
             </div>
             <p className="text-xs text-theme-secondary mt-0.5">
-              Keep listening today to build your streak record.
+              {insights.currentStreak > 0
+                ? 'Keep listening today to build your streak record.'
+                : 'Listen to just 5 minutes of recitation today to begin your streak.'}
             </p>
           </div>
         </div>
@@ -431,10 +480,15 @@ export default function HomePage() {
                   <Pause className="w-4 h-4 fill-current" />
                   <span>Pause</span>
                 </>
-              ) : (
+              ) : currentTrack ? (
                 <>
                   <Play className="w-4 h-4 fill-current ml-0.5" />
                   <span>Continue listening</span>
+                </>
+              ) : (
+                <>
+                  <Play className="w-4 h-4 fill-current ml-0.5" />
+                  <span>Listen to Al-Fatihah</span>
                 </>
               )}
             </button>
@@ -517,6 +571,18 @@ export default function HomePage() {
                         className="p-2 rounded-full text-theme-muted hover:text-rose-500 transition-colors"
                       >
                         <Heart className={`w-3.5 h-3.5 ${isFav ? 'fill-rose-500 text-rose-500' : ''}`} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          usePlaylistStore.getState().setSelectedSurahForAdd(surah.number);
+                        }}
+                        className="p-2 rounded-full text-theme-muted hover:text-emerald-500 transition-colors cursor-pointer"
+                        title="Add to personal playlist"
+                        aria-label="Add to personal playlist"
+                      >
+                        <ListPlus className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   </div>

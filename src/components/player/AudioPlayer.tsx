@@ -5,6 +5,7 @@ import { usePlayerStore } from '@/store/usePlayerStore';
 import { PLAYBACK_SPEEDS, AMBIENT_SOUNDS } from '@/lib/constants';
 import { audioManager, formatAudioTime, formatAudioDuration } from '@/lib/audioManager';
 import {
+  ListPlus,
   Play,
   Pause,
   SkipBack,
@@ -20,6 +21,7 @@ import {
   Sparkles,
   Maximize2
 } from 'lucide-react';
+import { usePlaylistStore } from '@/store/usePlaylistStore';
 import SleepTimerModal from './SleepTimerModal';
 import { AmbientSoundPickerModal } from './AmbientSoundPickerModal';
 import { TafsirModal } from './TafsirModal';
@@ -272,12 +274,6 @@ export default function AudioPlayer() {
             el.play().catch(() => {});
           }
         }}
-        onEnded={() => {
-          handleTrackEnded(currentTrack.audioUrl);
-        }}
-        onError={() => {
-          handleAudioError(currentTrack.audioUrl);
-        }}
       />
 
       {/* Secondary Ambient Loop Audio Element - Only render when valid URL exists */}
@@ -336,6 +332,16 @@ export default function AudioPlayer() {
               title={isFav ? "Remove from favorites" : "Add to favorites"}
             >
               <Heart className={`w-4 h-4 ${isFav ? 'fill-rose-500 text-rose-500' : ''}`} />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => usePlaylistStore.getState().setSelectedSurahForAdd(currentTrack.surah.number)}
+              className="p-1.5 rounded-full hover:bg-theme-elevated text-theme-muted hover:text-emerald-500 transition-colors cursor-pointer shrink-0"
+              title="Add to personal playlist"
+              aria-label="Add to personal playlist"
+            >
+              <ListPlus className="w-4 h-4" />
             </button>
           </div>
 

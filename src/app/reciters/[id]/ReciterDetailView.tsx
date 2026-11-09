@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { usePlayerStore } from '@/store/usePlayerStore';
 import { RECITERS, SURAHS } from '@/lib/constants';
-import { Play, Pause, Heart, ChevronLeft, Mic2, MapPin } from 'lucide-react';
+import { Play, Pause, Heart, ChevronLeft, Mic2, MapPin, ListPlus } from 'lucide-react';
+import { usePlaylistStore } from '@/store/usePlaylistStore';
 
 interface ReciterDetailViewProps {
   id: string;
@@ -164,6 +165,18 @@ export default function ReciterDetailView({ id }: ReciterDetailViewProps) {
                     className="p-2 rounded-full text-theme-muted hover:text-rose-500 transition-colors cursor-pointer"
                   >
                     <Heart className={`w-3.5 h-3.5 ${isFav ? 'fill-rose-500 text-rose-500' : ''}`} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      usePlaylistStore.getState().setSelectedSurahForAdd(surah.number);
+                    }}
+                    className="p-2 rounded-full text-theme-muted hover:text-emerald-500 transition-colors cursor-pointer"
+                    title="Add to personal playlist"
+                    aria-label="Add to personal playlist"
+                  >
+                    <ListPlus className="w-3.5 h-3.5" />
                   </button>
                 </div>
               </div>

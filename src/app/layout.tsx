@@ -7,6 +7,7 @@ import MobileNav from "@/components/layout/MobileNav";
 import AudioPlayer from "@/components/player/AudioPlayer";
 import MobileAppBridge from "@/components/layout/MobileAppBridge";
 import ThemeManager from "@/components/theme/ThemeManager";
+import AppHydrator from "@/components/layout/AppHydrator";
 import { Analytics } from "@vercel/analytics/react";
 
 const inter = Inter({
@@ -182,6 +183,9 @@ export default function RootLayout({
         <Suspense fallback={null}>
           <AudioPlayer />
         </Suspense>
+
+        {/* Global Client Session, Playlist & Auth Modals (Topmost Stacking Layer) */}
+        <AppHydrator />
       </body>
     </html>
   );

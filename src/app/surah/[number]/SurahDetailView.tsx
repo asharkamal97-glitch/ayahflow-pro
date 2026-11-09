@@ -5,9 +5,10 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { SURAHS } from '@/lib/constants';
 import { usePlayerStore } from '@/store/usePlayerStore';
+import { usePlaylistStore } from '@/store/usePlaylistStore';
 import { useTafsirSyncStore } from '@/store/useTafsirSyncStore';
 import { Ayah } from '@/types/quran';
-import { Play, Pause, ChevronLeft, ChevronRight, Heart, Volume2 } from 'lucide-react';
+import { Play, Pause, ChevronLeft, ChevronRight, Heart, Volume2, Plus, Library } from 'lucide-react';
 
 interface SurahDetailViewProps {
   number: string;
@@ -166,6 +167,15 @@ export default function SurahDetailView({ number }: SurahDetailViewProps) {
             title={isFav ? "Saved to favorites" : "Add to favorites"}
           >
             <Heart className={`w-4 h-4 ${isFav ? 'fill-rose-500 text-rose-500' : ''}`} />
+          </button>
+
+          <button
+            type="button"
+            onClick={() => usePlaylistStore.getState().setSelectedSurahForAdd(surah.number)}
+            className="p-3 rounded-full glass-panel hover:bg-theme-elevated text-theme-muted hover:text-emerald-500 transition-colors cursor-pointer flex items-center gap-1.5"
+            title="Add to personal playlist"
+          >
+            <Plus className="w-4 h-4" />
           </button>
         </div>
       </div>

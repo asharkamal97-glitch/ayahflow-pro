@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { COLLECTIONS, SURAHS, RECITERS } from '@/lib/constants';
 import { usePlayerStore } from '@/store/usePlayerStore';
 import { Play, Sparkles, Heart } from 'lucide-react';
+import PersonalPlaylistsSection from '@/components/playlist/PersonalPlaylistsSection';
 
 export default function CollectionsPage() {
   const { favorites, playSurah, selectedReciter } = usePlayerStore();
@@ -20,6 +21,9 @@ export default function CollectionsPage() {
           Curated thematic Quran recitations designed for your daily routine, prayer, and contemplation
         </p>
       </div>
+
+      {/* Personal User Playlists Section */}
+      <PersonalPlaylistsSection />
 
       {/* Curated Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

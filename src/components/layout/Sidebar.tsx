@@ -6,18 +6,22 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Home, Library, Mic2, Search, Flame, Download, Heart, User, LogIn, Settings } from 'lucide-react';
 import { usePlayerStore } from '@/store/usePlayerStore';
+import { useAuthStore } from '@/store/useAuthStore';
+import { usePlaylistStore } from '@/store/usePlaylistStore';
 import { usePlatform } from '@/lib/usePlatform';
 
 export default function Sidebar() {
   const pathname = usePathname();
   const { isNative } = usePlatform();
-  const { insights, downloadedSurahs } = usePlayerStore();
+  const { insights, downloadedSurahs, resetToGuestData } = usePlayerStore();
+  const { currentUser, setAuthModalOpen, signOut } = useAuthStore();
+  const { playlists, loadPlaylists } = usePlaylistStore();
 
   if (isNative) return null;
 
   const navItems = [
     { label: 'Home', href: '/', icon: Home },
-    { label: 'Collections', href: '/collections', icon: Library },
+    { label: 'Collections', href: '/collections', icon: Library, badge: playlists.length > 0 ? `${playlists.length}` : undefined },
     { label: 'Reciters', href: '/reciters', icon: Mic2 },
     { label: 'Search', href: '/search', icon: Search },
     { label: 'Insights & Streaks', href: '/insights', icon: Flame, badge: `${insights.currentStreak}d` },
@@ -95,20 +99,40 @@ export default function Sidebar() {
 
           {/* Account Status Card */}
           <div className="rounded-[24px] bg-theme-elevated border border-theme-subtle p-4 flex flex-col items-center text-center gap-2.5">
-            <div className="w-9 h-9 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+            <div className="w-9 h-9 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
               <User className="w-4 h-4" />
             </div>
-            <div className="flex flex-col gap-0.5">
-              <p className="text-xs font-semibold text-theme-primary">Offline-First Profile</p>
-              <p className="text-[11px] text-theme-muted">Streaks & library saved locally</p>
+            <div className="flex flex-col gap-0.5 max-w-full">
+              <p className="text-xs font-semibold text-theme-primary truncate">
+                {currentUser ? currentUser.displayName : 'Guest Sanctuary'}
+              </p>
+              <p className="text-[11px] text-theme-muted truncate">
+                {currentUser ? currentUser.email : 'Local library & habits'}
+              </p>
             </div>
-            <Link
-              href="/settings"
-              className="w-full py-2 px-3 rounded-full bg-theme-surface border border-theme-subtle text-theme-primary text-xs font-semibold hover:bg-theme-hover active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm"
-            >
-              <Settings className="w-3.5 h-3.5 text-emerald-500" />
-              <span>Appearance & Settings</span>
-            </Link>
+            {currentUser ? (
+              <button
+                type="button"
+                onClick={() => {
+                  signOut();
+                  resetToGuestData();
+                  loadPlaylists();
+                }}
+                className="w-full py-2 px-3 rounded-full bg-theme-surface border border-theme-subtle text-rose-500 text-xs font-semibold hover:bg-rose-500/10 active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm"
+              >
+                <LogIn className="w-3.5 h-3.5 rotate-180" />
+                <span>Sign Out</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setAuthModalOpen(true, 'signin')}
+                className="w-full py-2 px-3 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-md shadow-emerald-600/20"
+              >
+                <LogIn className="w-3.5 h-3.5" />
+                <span>Sign In / Sync</span>
+              </button>
+            )}
           </div>
         </div>
       </div>

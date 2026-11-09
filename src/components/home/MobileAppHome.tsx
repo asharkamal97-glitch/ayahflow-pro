@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePlayerStore } from '@/store/usePlayerStore';
+import { usePlaylistStore } from '@/store/usePlaylistStore';
 import { useThemeStore } from '@/store/useThemeStore';
 import { SURAHS, RECITERS, COLLECTIONS, AMBIENT_SOUNDS } from '@/lib/constants';
 import { formatAudioTime, formatAudioDuration } from '@/lib/audioManager';
@@ -11,6 +12,7 @@ import {
   Play,
   Pause,
   RotateCcw,
+  ListPlus,
   RotateCw,
   Heart,
   Volume2,
@@ -223,6 +225,15 @@ export default function MobileAppHome() {
               aria-label="Toggle favorite"
             >
               <Heart className={`w-5 h-5 ${isFav ? 'fill-rose-500 text-rose-500' : ''}`} />
+            </button>
+
+            <button
+              onClick={() => usePlaylistStore.getState().setSelectedSurahForAdd(activeSurah.number)}
+              className="p-2.5 rounded-full text-theme-muted hover:text-emerald-500 transition-colors active:scale-95"
+              aria-label="Add to personal playlist"
+              title="Add to personal playlist"
+            >
+              <ListPlus className="w-5 h-5" />
             </button>
 
             <div className="flex items-center gap-3">
@@ -565,6 +576,18 @@ export default function MobileAppHome() {
                     aria-label="Toggle favorite"
                   >
                     <Heart className={`w-4 h-4 ${isFavItem ? 'fill-rose-500 text-rose-500' : ''}`} />
+                  </button>
+
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      usePlaylistStore.getState().setSelectedSurahForAdd(surah.number);
+                    }}
+                    className="p-2 rounded-full text-theme-muted hover:text-emerald-500 transition-colors"
+                    aria-label="Add to personal playlist"
+                    title="Add to personal playlist"
+                  >
+                    <ListPlus className="w-4 h-4" />
                   </button>
                 </div>
               </div>

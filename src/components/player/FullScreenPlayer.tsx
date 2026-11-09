@@ -3,9 +3,11 @@
 import React, { useState } from 'react';
 import { usePlayerStore } from '@/store/usePlayerStore';
 import { useTafsirSyncStore } from '@/store/useTafsirSyncStore';
+import { usePlaylistStore } from '@/store/usePlaylistStore';
 import { PLAYBACK_SPEEDS, TAFSIRS } from '@/lib/constants';
 import { formatAudioTime, formatAudioDuration } from '@/lib/audioManager';
 import {
+  ListPlus,
   ChevronDown,
   Play,
   Pause,
@@ -331,6 +333,15 @@ export const FullScreenPlayer: React.FC = () => {
               title="Save to favorites"
             >
               <Heart className={`w-5 h-5 ${isFav ? 'fill-rose-500 text-rose-500' : ''}`} />
+            </button>
+            <button
+              type="button"
+              onClick={() => usePlaylistStore.getState().setSelectedSurahForAdd(currentTrack.surah.number)}
+              className="p-2.5 rounded-full text-theme-muted hover:text-emerald-500 bg-theme-elevated hover:bg-theme-hover border border-theme-subtle transition-colors cursor-pointer"
+              title="Add to personal playlist"
+              aria-label="Add to personal playlist"
+            >
+              <ListPlus className="w-5 h-5" />
             </button>
           </div>
         </div>
