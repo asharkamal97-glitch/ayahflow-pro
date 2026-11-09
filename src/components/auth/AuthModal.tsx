@@ -130,14 +130,14 @@ function AuthModalContent({ initialMode }: AuthModalContentProps) {
             {mode === 'signin'
               ? 'Welcome Back to AyahFlow'
               : mode === 'signup'
-              ? 'Create Your AyahFlow Sanctuary'
+              ? 'Join AyahFlow'
               : 'Reset Your Password'}
           </h2>
           <p className="text-xs text-theme-secondary max-w-xs">
             {mode === 'signin'
-              ? 'Sign in to access your personal playlists, favorites, and synchronized reflection habits.'
+              ? 'Sign in to access your personal playlists and synced listening history across all devices.'
               : mode === 'signup'
-              ? 'Create a private cloud account to curate personal surah playlists across all devices.'
+              ? 'Sign up with Google in one tap to instantly sync your surahs and playlists anywhere.'
               : 'Enter your account email address and we will send you a password reset link.'}
           </p>
         </div>
@@ -171,17 +171,17 @@ function AuthModalContent({ initialMode }: AuthModalContentProps) {
           </div>
         ) : (
           <>
-            {/* GOOGLE OAUTH BUTTON (SPOTIFY-STYLE) */}
+            {/* HERO GOOGLE OAUTH BUTTON (SPOTIFY / 1-CLICK STYLE) */}
             {mode !== 'reset' && isCloudConnected && (
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-2.5">
                 <button
                   type="button"
                   onClick={handleGoogleSignIn}
                   disabled={isLoading}
-                  className="w-full py-2.5 px-4 rounded-xl border border-theme-subtle bg-theme-elevated hover:bg-theme-hover text-theme-primary text-xs md:text-sm font-semibold transition-all flex items-center justify-center gap-3 shadow-sm hover:scale-[1.01] active:scale-[0.99] cursor-pointer disabled:opacity-50"
+                  className="group relative w-full py-3.5 px-5 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700/80 hover:border-emerald-500 dark:hover:border-emerald-500 text-zinc-800 dark:text-zinc-100 text-sm font-bold transition-all flex items-center justify-center gap-3 shadow-lg shadow-black/5 hover:shadow-emerald-500/10 hover:scale-[1.01] active:scale-[0.99] cursor-pointer disabled:opacity-50"
                 >
                   {/* Google SVG Logo */}
-                  <svg className="w-4 h-4" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
                     <path
                       fill="#4285F4"
                       d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -199,14 +199,21 @@ function AuthModalContent({ initialMode }: AuthModalContentProps) {
                       d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
                     />
                   </svg>
-                  <span>Continue with Google</span>
+                  <span>{mode === 'signup' ? 'Sign up with Google' : 'Continue with Google'}</span>
+                  <span className="hidden sm:inline-block ml-auto text-[10px] font-semibold uppercase tracking-wider py-0.5 px-2 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                    1-Click
+                  </span>
                 </button>
 
+                <p className="text-[11px] text-center text-theme-muted">
+                  No password required • Instant cross-device playlist sync
+                </p>
+
                 {/* Divider */}
-                <div className="relative flex items-center justify-center">
+                <div className="relative flex items-center justify-center my-1">
                   <div className="w-full border-t border-theme-subtle" />
                   <span className="absolute bg-theme-surface px-3 text-[10px] font-bold uppercase tracking-wider text-theme-muted">
-                    Or with email
+                    Or with email & password
                   </span>
                 </div>
               </div>
