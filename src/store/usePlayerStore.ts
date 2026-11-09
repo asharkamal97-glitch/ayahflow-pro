@@ -90,24 +90,8 @@ interface PlayerState {
   recordListeningTime: (seconds: number) => void;
 }
 
-export const cleanInitialInsights: ListeningInsights = {
-  totalMinutesListened: 0,
-  currentStreak: 0,
-  bestStreak: 0,
-  lastListenedDate: null,
-  dailyMinutes: {},
-  timeOfDayStats: {
-    afterFajr: 0,
-    morning: 0,
-    dhuhr: 0,
-    afternoon: 0,
-    afterMaghrib: 0,
-    evening: 0,
-    lateNight: 0,
-  },
-  reciterListens: {},
-  surahListens: {},
-};
+import { cleanInitialInsights, sanitizeInsights } from '@/lib/insightsUtils';
+export { cleanInitialInsights, sanitizeInsights };
 
 export const usePlayerStore = create<PlayerState>()(
   persist(
@@ -157,7 +141,7 @@ export const usePlayerStore = create<PlayerState>()(
         set((state) => ({
           favorites: Array.isArray(data.favorites) ? data.favorites : state.favorites,
           downloadedSurahs: Array.isArray(data.downloadedSurahs) ? data.downloadedSurahs : state.downloadedSurahs,
-          insights: data.insights || state.insights,
+          insights: sanitizeInsights(data.insights || state.insights),
         }));
       },
 
@@ -605,24 +589,25 @@ export const usePlayerStore = create<PlayerState>()(
 
         const today = new Date().toISOString().split('T')[0];
         const period = getCurrentTimeOfDayPeriod();
-        const { insights } = get();
+        const rawInsights = get().insights;
+        const currentInsights = sanitizeInsights(rawInsights);
 
         const dailyMinutes = {
-          ...insights.dailyMinutes,
-          [today]: (insights.dailyMinutes[today] || 0) + minutes
+          ...currentInsights.dailyMinutes,
+          [today]: (currentInsights.dailyMinutes[today] || 0) + minutes
         };
 
         const timeOfDayStats = {
-          ...insights.timeOfDayStats,
-          [period]: (insights.timeOfDayStats[period] || 0) + minutes
+          ...currentInsights.timeOfDayStats,
+          [period]: (currentInsights.timeOfDayStats[period] || 0) + minutes
         };
 
         // Streak calculation
-        let currentStreak = insights.currentStreak;
-        let bestStreak = insights.bestStreak;
-        if (insights.lastListenedDate !== today) {
+        let currentStreak = currentInsights.currentStreak;
+        let bestStreak = currentInsights.bestStreak;
+        if (currentInsights.lastListenedDate !== today) {
           const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-          if (insights.lastListenedDate === yesterday) {
+          if (currentInsights.lastListenedDate === yesterday) {
             currentStreak += 1;
           } else {
             currentStreak = 1;
@@ -632,9 +617,9 @@ export const usePlayerStore = create<PlayerState>()(
           }
         }
 
-        const updatedInsights = {
-          ...insights,
-          totalMinutesListened: insights.totalMinutesListened + minutes,
+        const updatedInsights: ListeningInsights = {
+          ...currentInsights,
+          totalMinutesListened: currentInsights.totalMinutesListened + minutes,
           currentStreak,
           bestStreak,
           lastListenedDate: today,

@@ -4,6 +4,7 @@ import { hashPassword, verifyPassword, generateSecureToken } from '@/lib/auth/cr
 import { getSupabaseClient, isSupabaseConfigured } from '@/lib/supabase/client';
 import { syncService } from '@/lib/supabase/syncService';
 import { usePlaylistStore } from './usePlaylistStore';
+import { cleanInitialInsights, sanitizeInsights } from '@/lib/insightsUtils';
 
 interface StoredAccount {
   profile: UserProfile;
@@ -74,24 +75,7 @@ export const cleanInitialAccountData: UserAccountData = {
   playlists: [],
   favorites: [],
   downloadedSurahs: [],
-  insights: {
-    totalMinutesListened: 0,
-    currentStreak: 0,
-    bestStreak: 0,
-    lastListenedDate: null,
-    dailyMinutes: {},
-    timeOfDayStats: {
-      afterFajr: 0,
-      morning: 0,
-      dhuhr: 0,
-      afternoon: 0,
-      afterMaghrib: 0,
-      evening: 0,
-      lateNight: 0,
-    },
-    reciterListens: {},
-    surahListens: {},
-  },
+  insights: cleanInitialInsights,
   lastActivePlaylistId: null,
 };
 
@@ -330,7 +314,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             playlists: cloudPlaylists.success && cloudPlaylists.data ? cloudPlaylists.data : existingLocal.playlists,
             favorites: cloudPrefs.success && cloudPrefs.data?.favorites ? cloudPrefs.data.favorites : existingLocal.favorites,
             downloadedSurahs: cloudPrefs.success && cloudPrefs.data?.downloadedSurahs ? cloudPrefs.data.downloadedSurahs : existingLocal.downloadedSurahs,
-            insights: cloudPrefs.success && cloudPrefs.data?.insights ? cloudPrefs.data.insights : existingLocal.insights,
+            insights: sanitizeInsights(cloudPrefs.success && cloudPrefs.data?.insights ? cloudPrefs.data.insights : existingLocal.insights),
           };
           localStorage.setItem(getUserDataKey(sbUser.id), JSON.stringify(merged));
         }
@@ -519,7 +503,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             playlists: cloudPlaylists.success && cloudPlaylists.data ? cloudPlaylists.data : existingLocal.playlists,
             favorites: cloudPrefs.success && cloudPrefs.data?.favorites ? cloudPrefs.data.favorites : existingLocal.favorites,
             downloadedSurahs: cloudPrefs.success && cloudPrefs.data?.downloadedSurahs ? cloudPrefs.data.downloadedSurahs : existingLocal.downloadedSurahs,
-            insights: cloudPrefs.success && cloudPrefs.data?.insights ? cloudPrefs.data.insights : existingLocal.insights,
+            insights: sanitizeInsights(cloudPrefs.success && cloudPrefs.data?.insights ? cloudPrefs.data.insights : existingLocal.insights),
           };
           localStorage.setItem(getUserDataKey(sbSession.user.id), JSON.stringify(merged));
           return;
@@ -565,7 +549,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         playlists: Array.isArray(parsed.playlists) ? parsed.playlists : [],
         favorites: Array.isArray(parsed.favorites) ? parsed.favorites : [],
         downloadedSurahs: Array.isArray(parsed.downloadedSurahs) ? parsed.downloadedSurahs : [],
-        insights: parsed.insights && typeof parsed.insights === 'object' ? parsed.insights : cleanInitialAccountData.insights,
+        insights: sanitizeInsights(parsed.insights),
         lastActivePlaylistId: parsed.lastActivePlaylistId || null,
       };
     } catch (err) {

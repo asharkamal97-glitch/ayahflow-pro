@@ -2,27 +2,26 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePlayerStore } from '@/store/usePlayerStore';
+import { sanitizeInsights } from '@/lib/insightsUtils';
 import { SURAHS, RECITERS, getPeriodTitle } from '@/lib/constants';
 import {
   Flame,
   Clock,
-  Calendar,
   Share2,
   Trophy,
   Sparkles,
   ChevronRight,
   TrendingUp,
   Headphones,
-  CheckCircle2,
-  Copy,
   Check
 } from 'lucide-react';
 
 export default function InsightsPage() {
-  const { insights, playSurah, setSelectedReciter } = usePlayerStore();
+  const { insights: rawInsights, playSurah } = usePlayerStore();
+  const insights = sanitizeInsights(rawInsights);
   const [copied, setCopied] = useState(false);
-  const [activeTab, setActiveTab] = useState<'weekly' | 'allTime'>('weekly');
 
   const shareText = `Alhamdulillah! I'm on a ${insights.currentStreak} day streak listening to the Holy Quran on AyahFlow! Listen. Reflect. Find Peace. 📖✨`;
 
@@ -34,38 +33,41 @@ export default function InsightsPage() {
     }
   };
 
-  // Calculate top reciters
-  const topRecitersList = Object.entries(insights.reciterListens)
+  // Safe calculate top reciters
+  const reciterListens = insights.reciterListens && typeof insights.reciterListens === 'object' ? insights.reciterListens : {};
+  const topRecitersList = Object.entries(reciterListens)
     .sort(([, a], [, b]) => b - a)
     .slice(0, 3)
     .map(([reciterId, count]) => {
       const reciter = RECITERS.find((r) => r.id === reciterId);
       return { reciter, count };
     })
-    .filter((item) => item.reciter !== undefined);
+    .filter((item): item is { reciter: (typeof RECITERS)[number]; count: number } => item.reciter !== undefined);
 
-  // Calculate top surahs
-  const topSurahsList = Object.entries(insights.surahListens)
+  // Safe calculate top surahs
+  const surahListens = insights.surahListens && typeof insights.surahListens === 'object' ? insights.surahListens : {};
+  const topSurahsList = Object.entries(surahListens)
     .sort(([, a], [, b]) => b - a)
     .slice(0, 4)
     .map(([numStr, count]) => {
-      const surah = SURAHS.find((s) => s.number === parseInt(numStr));
+      const surah = SURAHS.find((s) => s.number === parseInt(numStr, 10));
       return { surah, count };
     })
-    .filter((item) => item.surah !== undefined);
+    .filter((item): item is { surah: (typeof SURAHS)[number]; count: number } => item.surah !== undefined);
 
-  // Peak period
-  const peakPeriodEntry = Object.entries(insights.timeOfDayStats)
-    .sort(([, a], [, b]) => b - a)[0];
-  const peakPeriodTitle = peakPeriodEntry ? getPeriodTitle(peakPeriodEntry[0]) : 'After Fajr';
+  // Safe calculate peak period
+  const timeOfDayStats = insights.timeOfDayStats && typeof insights.timeOfDayStats === 'object' ? insights.timeOfDayStats : {};
+  const peakPeriodEntry = (Object.entries(timeOfDayStats) as [string, number][]).sort(([, a], [, b]) => b - a)[0];
+  const peakPeriodTitle = peakPeriodEntry && peakPeriodEntry[1] > 0 ? getPeriodTitle(peakPeriodEntry[0]) : 'After Fajr';
 
   // Last 7 days chart data
+  const dailyMinutes = insights.dailyMinutes && typeof insights.dailyMinutes === 'object' ? insights.dailyMinutes : {};
   const last7Days = Array.from({ length: 7 }, (_, i) => {
     const d = new Date();
     d.setDate(d.getDate() - (6 - i));
     const dateStr = d.toISOString().split('T')[0];
     const dayName = d.toLocaleDateString('en-US', { weekday: 'short' });
-    const minutes = insights.dailyMinutes[dateStr] || 0;
+    const minutes = dailyMinutes[dateStr] || 0;
     return { dayName, dateStr, minutes };
   });
 
@@ -235,7 +237,8 @@ export default function InsightsPage() {
                 { key: 'evening', label: 'Evening (Isha)', color: 'bg-indigo-400' },
                 { key: 'lateNight', label: 'Late Night (Tahajjud)', color: 'bg-purple-400' },
               ].map((period) => {
-                const minutes = (insights.timeOfDayStats as any)[period.key] || 0;
+                const statsMap = insights.timeOfDayStats as unknown as Record<string, number>;
+                const minutes = statsMap[period.key] || 0;
                 return (
                   <div key={period.key} className="flex items-center justify-between text-xs">
                     <span className="text-theme-secondary flex items-center gap-2">
@@ -262,36 +265,47 @@ export default function InsightsPage() {
           <h2 className="text-lg font-bold text-theme-primary mb-1">Most Listened Reciters</h2>
           <p className="text-xs text-theme-secondary mb-4">Voices that resonate most with your heart</p>
 
-          <div className="space-y-3">
-            {topRecitersList.map((item, idx) => (
-              <div
-                key={item.reciter!.id}
-                className="flex items-center justify-between p-3 rounded-2xl bg-theme-elevated border border-theme-subtle hover:border-emerald-500/40 transition-all"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="font-mono text-xs text-emerald-600 dark:text-emerald-400 font-bold w-4">
-                    #{idx + 1}
-                  </span>
-                  <img
-                    src={item.reciter!.avatar}
-                    alt={item.reciter!.name}
-                    className="w-10 h-10 rounded-full object-cover border border-theme-subtle"
-                  />
-                  <div>
-                    <div className="text-sm font-bold text-theme-primary">{item.reciter!.name}</div>
-                    <div className="text-xs text-theme-secondary">{item.reciter!.country} • {item.reciter!.style}</div>
-                  </div>
-                </div>
-
-                <Link
-                  href={`/reciters/${item.reciter!.id}`}
-                  className="p-2 rounded-xl text-theme-secondary hover:text-theme-primary hover:bg-theme-surface transition-colors"
+          {topRecitersList.length === 0 ? (
+            <div className="py-8 px-4 rounded-2xl bg-theme-elevated/40 border border-theme-subtle text-center flex flex-col items-center justify-center gap-2">
+              <Headphones className="w-8 h-8 text-theme-muted" />
+              <p className="text-xs text-theme-secondary font-semibold">No reciter sessions recorded yet</p>
+              <p className="text-[11px] text-theme-muted">Start listening to build your reciter insights</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {topRecitersList.map((item, idx) => (
+                <div
+                  key={item.reciter.id}
+                  className="flex items-center justify-between p-3 rounded-2xl bg-theme-elevated border border-theme-subtle hover:border-emerald-500/40 transition-all"
                 >
-                  <ChevronRight className="w-4 h-4" />
-                </Link>
-              </div>
-            ))}
-          </div>
+                  <div className="flex items-center gap-3">
+                    <span className="font-mono text-xs text-emerald-600 dark:text-emerald-400 font-bold w-4">
+                      #{idx + 1}
+                    </span>
+                    <Image
+                      src={item.reciter.avatar}
+                      alt={item.reciter.name}
+                      width={40}
+                      height={40}
+                      unoptimized
+                      className="w-10 h-10 rounded-full object-cover border border-theme-subtle"
+                    />
+                    <div>
+                      <div className="text-sm font-bold text-theme-primary">{item.reciter.name}</div>
+                      <div className="text-xs text-theme-secondary">{item.reciter.country} • {item.reciter.style}</div>
+                    </div>
+                  </div>
+
+                  <Link
+                    href={`/reciters/${item.reciter.id}`}
+                    className="p-2 rounded-xl text-theme-secondary hover:text-theme-primary hover:bg-theme-surface transition-colors"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </Link>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Most Listened Surahs */}
@@ -299,33 +313,41 @@ export default function InsightsPage() {
           <h2 className="text-lg font-bold text-theme-primary mb-1">Top Surahs</h2>
           <p className="text-xs text-theme-secondary mb-4">Your most repeated chapters</p>
 
-          <div className="space-y-2.5">
-            {topSurahsList.map((item, idx) => (
-              <div
-                key={item.surah!.number}
-                onClick={() => playSurah(item.surah!)}
-                className="flex items-center justify-between p-3 rounded-2xl bg-theme-elevated border border-theme-subtle hover:border-emerald-500/40 cursor-pointer transition-all group"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="w-7 h-7 rounded-lg bg-theme-surface border border-theme-subtle text-theme-primary font-mono text-xs flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-colors font-bold">
-                    {item.surah!.number}
-                  </span>
-                  <div>
-                    <div className="text-sm font-bold text-theme-primary group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
-                      Surah {item.surah!.englishName}
-                    </div>
-                    <div className="text-xs text-theme-secondary">
-                      {item.surah!.numberOfAyahs} Ayahs • {item.count} sessions
+          {topSurahsList.length === 0 ? (
+            <div className="py-8 px-4 rounded-2xl bg-theme-elevated/40 border border-theme-subtle text-center flex flex-col items-center justify-center gap-2">
+              <Sparkles className="w-8 h-8 text-theme-muted" />
+              <p className="text-xs text-theme-secondary font-semibold">No surahs recorded yet</p>
+              <p className="text-[11px] text-theme-muted">Play a surah to begin tracking your habit</p>
+            </div>
+          ) : (
+            <div className="space-y-2.5">
+              {topSurahsList.map((item) => (
+                <div
+                  key={item.surah.number}
+                  onClick={() => playSurah(item.surah)}
+                  className="flex items-center justify-between p-3 rounded-2xl bg-theme-elevated border border-theme-subtle hover:border-emerald-500/40 cursor-pointer transition-all group"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="w-7 h-7 rounded-lg bg-theme-surface border border-theme-subtle text-theme-primary font-mono text-xs flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-colors font-bold">
+                      {item.surah.number}
+                    </span>
+                    <div>
+                      <div className="text-sm font-bold text-theme-primary group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                        Surah {item.surah.englishName}
+                      </div>
+                      <div className="text-xs text-theme-secondary">
+                        {item.surah.numberOfAyahs} Ayahs • {item.count} sessions
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <span className="font-serif text-lg text-emerald-700 dark:text-emerald-300">
-                  {item.surah!.name}
-                </span>
-              </div>
-            ))}
-          </div>
+                  <span className="font-serif text-lg text-emerald-700 dark:text-emerald-300">
+                    {item.surah.name}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
